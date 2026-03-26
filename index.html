@@ -32,13 +32,12 @@ body{font-family:var(--sans);background:var(--bg);color:var(--tx);min-height:100
 /* HEADER */
 .hdr{position:sticky;top:0;z-index:200;background:rgba(8,12,23,.95);
   backdrop-filter:blur(20px);border-bottom:1px solid var(--bd);
-  height:60px;display:flex;align-items:center;padding:0 22px;gap:12px;flex-wrap:wrap}
-.logo{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--tx);
-  white-space:nowrap;flex-shrink:0}
+  padding:0 22px;height:60px;display:flex;align-items:center;gap:12px}
+.logo{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--tx);white-space:nowrap;flex-shrink:0}
 .logo em{color:var(--green);font-style:normal}
-.live-chip{display:inline-flex;align-items:center;gap:5px;flex-shrink:0;
-  background:var(--gn2);border:1px solid var(--gn3);
-  color:var(--green);font-family:var(--mono);font-size:9px;font-weight:700;
+.chip{display:inline-flex;align-items:center;gap:5px;flex-shrink:0;
+  background:var(--gn2);border:1px solid var(--gn3);color:var(--green);
+  font-family:var(--mono);font-size:9px;font-weight:700;
   padding:3px 10px;border-radius:20px;letter-spacing:.5px}
 .dot{width:6px;height:6px;border-radius:50%;background:var(--green);
   animation:dp 2s ease-in-out infinite}
@@ -48,10 +47,10 @@ body{font-family:var(--sans);background:var(--bg);color:var(--tx);min-height:100
   letter-spacing:.5px;white-space:nowrap;margin-left:auto}
 
 /* CONTROLS */
-.ctrlbar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:0 22px 10px;
-  background:rgba(8,12,23,.6);border-bottom:1px solid var(--bd)}
+.cbar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;
+  padding:10px 22px;background:rgba(8,12,23,.6);border-bottom:1px solid var(--bd)}
 .ctrl{display:flex;align-items:center;gap:5px;background:var(--s1);
-  border:1px solid var(--bd);border-radius:7px;padding:5px 11px;transition:border-color .18s}
+  border:1px solid var(--bd);border-radius:7px;padding:5px 11px}
 .ctrl:focus-within{border-color:var(--bd2)}
 .cl{font-family:var(--mono);font-size:9px;font-weight:600;color:var(--tx3);
   text-transform:uppercase;letter-spacing:.7px;white-space:nowrap}
@@ -59,7 +58,7 @@ select{background:transparent;border:none;outline:none;color:var(--tx);
   font-family:var(--sans);font-size:12px;font-weight:600;
   -webkit-appearance:none;appearance:none;cursor:pointer;padding:0 2px;min-width:75px}
 select option{background:#0f172a;color:var(--tx)}
-#hrCtrl{display:none}
+#hrC{display:none}
 
 /* STATS */
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));
@@ -71,12 +70,12 @@ select option{background:#0f172a;color:var(--tx)}
 .g::before{background:var(--green)}.b::before{background:var(--blue)}
 .a::before{background:var(--amber)}.p::before{background:var(--purple)}
 .c::before{background:var(--cyan)}.o::before{background:var(--orange)}.r::before{background:var(--red)}
-.sc-l{font-family:var(--mono);font-size:9px;font-weight:600;color:var(--tx3);
+.sl{font-family:var(--mono);font-size:9px;font-weight:600;color:var(--tx3);
   text-transform:uppercase;letter-spacing:.7px;margin-bottom:7px}
-.sc-v{font-family:var(--mono);font-size:26px;font-weight:700;line-height:1;color:var(--tx)}
-.g .sc-v{color:var(--green)}.a .sc-v{color:var(--amber)}.p .sc-v{color:var(--purple)}
-.o .sc-v{color:var(--orange)}.r .sc-v{color:var(--red)}
-.sc-s{font-family:var(--mono);font-size:9px;color:var(--tx3);margin-top:4px}
+.sv{font-family:var(--mono);font-size:26px;font-weight:700;line-height:1;color:var(--tx)}
+.g .sv{color:var(--green)}.a .sv{color:var(--amber)}.p .sv{color:var(--purple)}
+.o .sv{color:var(--orange)}.r .sv{color:var(--red)}
+.ss{font-family:var(--mono);font-size:9px;color:var(--tx3);margin-top:4px}
 
 /* BODY */
 .body{padding:0 22px 40px}
@@ -89,10 +88,10 @@ select option{background:#0f172a;color:var(--tx)}
   padding:10px 16px;background:var(--s1);border-bottom:1px solid var(--bd);
   cursor:pointer;user-select:none;gap:10px;flex-wrap:wrap;transition:background .14s}
 .thdr:hover{background:var(--s2)}
-.tname{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--cyan);
+.tn{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--cyan);
   display:flex;align-items:center;gap:7px}
-.chev{font-size:9px;color:var(--tx3);transition:transform .18s;flex-shrink:0}
-.team.col .chev{transform:rotate(-90deg)}
+.chv{font-size:9px;color:var(--tx3);transition:transform .18s;flex-shrink:0}
+.team.col .chv{transform:rotate(-90deg)}
 .team.col .tbody{display:none}
 .pills{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
 .pill{font-family:var(--mono);font-size:9px;font-weight:700;
@@ -104,7 +103,7 @@ select option{background:#0f172a;color:var(--tx)}
 .pe{background:var(--am2);color:var(--amber);border:1px solid rgba(251,191,36,.2)}
 
 /* TABLE */
-.twrap{overflow-x:auto}
+.tw{overflow-x:auto}
 table{width:100%;border-collapse:collapse}
 thead th{background:rgba(4,6,12,.85);padding:7px 13px;font-family:var(--mono);
   font-size:9px;font-weight:600;color:var(--tx3);text-transform:uppercase;
@@ -121,7 +120,7 @@ tbody td{padding:8px 13px;vertical-align:middle}
 .cv{font-family:var(--mono);color:var(--amber);font-weight:700;font-size:12px}
 .ca{font-size:11px;color:var(--tx2);white-space:nowrap}
 
-/* Badges */
+/* badges */
 .badge{font-family:var(--mono);font-size:9px;font-weight:700;padding:3px 9px;
   border-radius:20px;text-transform:uppercase;letter-spacing:.3px;
   white-space:nowrap;display:inline-block}
@@ -131,7 +130,7 @@ tbody td{padding:8px 13px;vertical-align:middle}
 .auto_returned{background:var(--rd2);color:var(--red);border:1px solid rgba(255,64,96,.3)}
 .timed_out{background:rgba(40,50,70,.4);color:var(--tx3);border:1px solid var(--bd)}
 
-/* Time left */
+/* time left */
 .tl{font-family:var(--mono);font-size:12px;font-weight:700;white-space:nowrap}
 .tok{color:var(--green)}.twn{color:var(--amber)}
 .tdg{color:var(--red);animation:bk .65s infinite}.txx{color:var(--tx3)}
@@ -141,61 +140,51 @@ tbody td{padding:8px 13px;vertical-align:middle}
 .empty-i{font-size:36px;margin-bottom:12px;opacity:.5}
 
 @media(max-width:640px){
-  .hdr{height:auto;padding:10px 14px;flex-wrap:wrap;gap:8px}
-  .stats,.body{padding-left:14px;padding-right:14px}
+  .hdr{height:auto;padding:10px 14px;flex-wrap:wrap}
+  .stats,.body,.cbar{padding-left:14px;padding-right:14px}
   .stats{grid-template-columns:repeat(2,1fr)}
-  .ctrlbar{padding:8px 14px}
 }
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
 <div class="hdr">
   <div class="logo">📡 MTurk HIT Tracker <em>// LIVE</em></div>
-  <span class="live-chip"><span class="dot"></span>REAL-TIME</span>
+  <span class="chip"><span class="dot"></span>REAL-TIME</span>
   <span id="sync">Connecting…</span>
   <span id="clk"></span>
 </div>
 
-<!-- CONTROLS -->
-<div class="ctrlbar">
+<div class="cbar">
   <div class="ctrl">
     <span class="cl">VIEW</span>
-    <select id="freqSel" onchange="onFreq()">
+    <select id="fqSel" onchange="onFreq()">
       <option value="hourly">Hourly</option>
       <option value="daily">Daily</option>
       <option value="monthly">Monthly</option>
       <option value="yearly">Yearly</option>
     </select>
   </div>
-  <div class="ctrl" id="hrCtrl">
+  <div class="ctrl" id="hrC">
     <span class="cl">HRS</span>
     <select id="hrSel" onchange="applyFilters()">
-      <option value="1">1 hr</option>
-      <option value="2">2 hr</option>
-      <option value="3">3 hr</option>
-      <option value="4">4 hr</option>
-      <option value="6">6 hr</option>
-      <option value="8">8 hr</option>
+      <option value="1">1 hr</option><option value="2">2 hr</option>
+      <option value="3">3 hr</option><option value="4">4 hr</option>
+      <option value="6">6 hr</option><option value="8">8 hr</option>
       <option value="12">12 hr</option>
     </select>
   </div>
   <div class="ctrl">
     <span class="cl">TEAM</span>
-    <select id="teamSel" onchange="applyFilters()">
-      <option value="">All Teams</option>
-    </select>
+    <select id="tmSel" onchange="applyFilters()"><option value="">All Teams</option></select>
   </div>
   <div class="ctrl">
     <span class="cl">WORKER</span>
-    <select id="wrkSel" onchange="applyFilters()">
-      <option value="">All Workers</option>
-    </select>
+    <select id="wkSel" onchange="applyFilters()"><option value="">All Workers</option></select>
   </div>
   <div class="ctrl">
     <span class="cl">STATUS</span>
-    <select id="stsSel" onchange="applyFilters()">
+    <select id="stSel" onchange="applyFilters()">
       <option value="">All</option>
       <option value="active">Active</option>
       <option value="manual_returned">M Return</option>
@@ -205,19 +194,17 @@ tbody td{padding:8px 13px;vertical-align:middle}
   </div>
 </div>
 
-<!-- STATS -->
 <div class="stats">
-  <div class="sc g"><div class="sc-l">Active Now</div><div class="sc-v" id="sAct">—</div><div class="sc-s" id="sActS">workers</div></div>
-  <div class="sc b"><div class="sc-l">Total HITs</div><div class="sc-v" id="sTot">—</div></div>
-  <div class="sc a"><div class="sc-l">Earned ($)</div><div class="sc-v" id="sEarn">—</div><div class="sc-s">submitted only</div></div>
-  <div class="sc p"><div class="sc-l">Workers</div><div class="sc-v" id="sWrk">—</div></div>
-  <div class="sc c"><div class="sc-l">Teams</div><div class="sc-v" id="sTms" style="color:var(--cyan)">—</div></div>
-  <div class="sc b"><div class="sc-l">Submitted</div><div class="sc-v" id="sSub">—</div></div>
-  <div class="sc o"><div class="sc-l">M Returns</div><div class="sc-v" id="sMR">—</div><div class="sc-s">manual</div></div>
-  <div class="sc r"><div class="sc-l">A Returns</div><div class="sc-v" id="sAR">—</div><div class="sc-s">auto</div></div>
+  <div class="sc g"><div class="sl">Active Now</div><div class="sv" id="sAct">—</div><div class="ss" id="sActS">workers</div></div>
+  <div class="sc b"><div class="sl">Total HITs</div><div class="sv" id="sTot">—</div></div>
+  <div class="sc a"><div class="sl">Earned ($)</div><div class="sv" id="sEar">—</div><div class="ss">submitted only</div></div>
+  <div class="sc p"><div class="sl">Workers</div><div class="sv" id="sWrk">—</div></div>
+  <div class="sc c"><div class="sl">Teams</div><div class="sv" id="sTms" style="color:var(--cyan)">—</div></div>
+  <div class="sc b"><div class="sl">Submitted</div><div class="sv" id="sSub">—</div></div>
+  <div class="sc o"><div class="sl">M Returns</div><div class="sv" id="sMR">—</div><div class="ss">manual</div></div>
+  <div class="sc r"><div class="sl">A Returns</div><div class="sv" id="sAR">—</div><div class="ss">auto</div></div>
 </div>
 
-<!-- BODY -->
 <div class="body" id="body">
   <div class="empty"><div class="empty-i">⏳</div>Connecting to Firebase…</div>
 </div>
@@ -236,20 +223,18 @@ const db = getFirestore(initializeApp({
   appId:             "1:889596390115:web:024527c2a5ed98fbc473d6"
 }));
 
-let allHits = [];
-let rPending = false;
+let allHits  = [];
+let dirty    = false;
+const TC     = new Map();   /* id → { td, expiresMs } */
 
-/* time cell map: id → { td, expiresMs } */
-const TC = new Map();
-
-/* ── Clock ── */
+/* Clock */
 (function tick(){
   document.getElementById("clk").textContent =
     new Date().toLocaleTimeString([],{hour12:false});
   setTimeout(tick, 1000 - Date.now()%1000);
 })();
 
-/* ── Second ticker — ONLY updates time cells ── */
+/* Second ticker — ONLY updates time-left cells */
 setInterval(()=>{
   const now = Date.now();
   TC.forEach((d,id)=>{
@@ -258,15 +243,16 @@ setInterval(()=>{
   });
 }, 1000);
 
-/* ── Firebase listener ── */
+/* Firebase real-time listener */
 onSnapshot(
   query(collection(db,"hits"), orderBy("acceptedAt","desc")),
   snap => {
     allHits = snap.docs.map(d=>({id:d.id,...d.data()}));
     autoExpire();
     rebuildSelects();
-    if(!rPending){ rPending=true; requestAnimationFrame(()=>{rPending=false;applyFilters();}); }
-    document.getElementById("sync").textContent = "Synced: "+new Date().toLocaleTimeString();
+    if(!dirty){dirty=true;requestAnimationFrame(()=>{dirty=false;applyFilters();});}
+    document.getElementById("sync").textContent =
+      "Synced: " + new Date().toLocaleTimeString();
   },
   err => { document.getElementById("sync").textContent = "⚠️ "+err.message; }
 );
@@ -274,19 +260,20 @@ onSnapshot(
 function autoExpire(){
   const now = new Date();
   allHits.forEach(h=>{
-    if(h.status==="active" && h.expiresAt && new Date(h.expiresAt)<now){
+    if(h.status==="active"&&h.expiresAt&&new Date(h.expiresAt)<now){
       h.status="timed_out";
-      setDoc(doc(db,"hits",h.id),{status:"timed_out",timedOutAt:now.toISOString()},{merge:true}).catch(()=>{});
+      setDoc(doc(db,"hits",h.id),{status:"timed_out",timedOutAt:now.toISOString()},{merge:true})
+        .catch(()=>{});
     }
   });
 }
 
-/* ── Dropdowns ── */
 function rebuildSelects(){
   const teams = [...new Set(allHits.map(h=>h.teamname||"No Team"))].sort();
+  /* Username column: show what's stored in Firebase (from sheet column A) */
   const wrks  = [...new Set(allHits.map(h=>h.username||h.workerId||"?"))].sort();
-  fill("teamSel", teams, "All Teams");
-  fill("wrkSel",  wrks,  "All Workers");
+  fill("tmSel", teams, "All Teams");
+  fill("wkSel", wrks,  "All Workers");
 }
 function fill(id, items, ph){
   const s=document.getElementById(id), c=s.value;
@@ -295,21 +282,21 @@ function fill(id, items, ph){
 }
 
 window.onFreq = ()=>{
-  document.getElementById("hrCtrl").style.display =
-    document.getElementById("freqSel").value==="hourly"?"flex":"none";
+  document.getElementById("hrC").style.display =
+    document.getElementById("fqSel").value==="hourly"?"flex":"none";
   applyFilters();
 };
 
 window.applyFilters = ()=>{
-  const freq = document.getElementById("freqSel").value;
+  const freq = document.getElementById("fqSel").value;
   const hrs  = parseInt(document.getElementById("hrSel").value||"1");
-  const team = document.getElementById("teamSel").value;
-  const wrk  = document.getElementById("wrkSel").value;
-  const sts  = document.getElementById("stsSel").value;
+  const team = document.getElementById("tmSel").value;
+  const wrk  = document.getElementById("wkSel").value;
+  const sts  = document.getElementById("stSel").value;
   const now  = new Date();
 
   const MS={hourly:hrs*3600e3,daily:86400e3,monthly:30*86400e3,yearly:365*86400e3};
-  const cut = MS[freq] ? new Date(now-MS[freq]) : null;
+  const cut = MS[freq]?new Date(now-MS[freq]):null;
 
   let hits = allHits;
   if(cut)  hits=hits.filter(h=>h.acceptedAt&&new Date(h.acceptedAt)>=cut);
@@ -330,7 +317,7 @@ function renderStats(hits,now){
   set("sAct",  new Set(act.map(h=>h.workerId)).size);
   set("sActS", act.length+" active HIT"+(act.length!==1?"s":""));
   set("sTot",  hits.length);
-  set("sEarn", "$"+earn.toFixed(2));
+  set("sEar",  "$"+earn.toFixed(2));
   set("sWrk",  new Set(hits.map(h=>h.workerId)).size);
   set("sTms",  new Set(hits.map(h=>h.teamname||"No Team")).size);
   set("sSub",  sub.length);
@@ -352,8 +339,8 @@ function renderTeams(hits,now){
   const order=[...map.keys()].sort((a,b)=>a.localeCompare(b));
 
   const collapsed=new Set([...body.querySelectorAll(".team.col")].map(e=>e.dataset.team));
-  const curOrder=[...body.querySelectorAll(".team")].map(e=>e.dataset.team).join("|");
-  const newOrder=order.join("|");
+  const curOrder =[...body.querySelectorAll(".team")].map(e=>e.dataset.team).join("|");
+  const newOrder = order.join("|");
 
   if(curOrder!==newOrder){
     TC.clear();
@@ -377,13 +364,12 @@ function buildTeam(team,hits,now,isColl){
   const mR   = hits.filter(h=>h.status==="manual_returned");
   const aR   = hits.filter(h=>h.status==="auto_returned");
   const earn = sub.reduce((s,h)=>s+(parseFloat(h.reward)||0),0);
-
-  const el=document.createElement("div");
-  el.className="team"+(isColl?" col":"");
-  el.dataset.team=team;
+  const el   = document.createElement("div");
+  el.className   = "team"+(isColl?" col":"");
+  el.dataset.team = team;
   el.innerHTML=`
   <div class="thdr">
-    <div class="tname"><span class="chev">▾</span>🏷 ${x(team)}<span style="color:var(--tx3);font-size:9px">(${hits.length})</span></div>
+    <div class="tn"><span class="chv">▾</span>🏷 ${x(team)}<span style="color:var(--tx3);font-size:9px">(${hits.length})</span></div>
     <div class="pills">
       <span class="pill pa">🟢 ${act.length} Active</span>
       <span class="pill ps">✓ ${sub.length} Done</span>
@@ -392,7 +378,7 @@ function buildTeam(team,hits,now,isColl){
       <span class="pill pe">$${earn.toFixed(2)}</span>
     </div>
   </div>
-  <div class="tbody"><div class="twrap">
+  <div class="tbody"><div class="tw">
     <table>
       <thead><tr>
         <th>Worker ID</th><th>Username</th><th>Requester</th>
@@ -413,17 +399,20 @@ function buildRow(h,now){
   const exMs=h.expiresAt?new Date(h.expiresAt).getTime():0;
   const diff=exMs-now.getTime();
   const isAct=h.status==="active"&&diff>0;
-  const tdAttr=isAct?`class="tl-td" data-exp="${exMs}" data-id="${x(h.id)}"`:`class="tl-td"`;
+  const tdA=isAct?`class="tl-td" data-exp="${exMs}" data-id="${x(h.id)}"`:`class="tl-td"`;
   const LABEL={active:"Active",submitted:"Submitted",
     manual_returned:"M Return",auto_returned:"A Return",timed_out:"Timed Out"};
+  /* Username: use what's stored (from sheet col A). If it looks like a Worker ID, dim it. */
+  const uname = h.username || h.workerId || "—";
+  const unameStyle = /^A[A-Z0-9]{9,}$/.test(uname) ? "color:var(--tx2);font-family:var(--mono);font-size:11px" : "";
   return`<tr>
     <td class="cw">${x(h.workerId||"—")}</td>
-    <td class="cn">${x(h.username||"Unknown")}</td>
+    <td class="cn"><span style="${unameStyle}">${x(uname)}</span></td>
     <td class="cr">${x(h.requester||"—")}</td>
     <td><div class="ct" title="${x(h.title||"")}">${x(h.title||"—")}</div></td>
     <td class="cv">$${(parseFloat(h.reward)||0).toFixed(2)}</td>
     <td class="ca">${accStr}</td>
-    <td ${tdAttr}>${isAct?tlHtml(diff):`<span class="tl txx">—</span>`}</td>
+    <td ${tdA}>${isAct?tlHtml(diff):`<span class="tl txx">—</span>`}</td>
     <td><span class="badge ${h.status||"active"}">${LABEL[h.status]||h.status||"Active"}</span></td>
   </tr>`;
 }
@@ -443,13 +432,11 @@ function regTC(root){
     if(id&&ex) TC.set(id,{td,expiresMs:ex});
   });
 }
-
 function attachToggles(root){
   root.querySelectorAll(".thdr").forEach(h=>{
     h.addEventListener("click",()=>h.closest(".team").classList.toggle("col"));
   });
 }
-
 function softUpdate(bl,hits,now){
   const act  = hits.filter(h=>h.status==="active"&&new Date(h.expiresAt||0)>now);
   const sub  = hits.filter(h=>h.status==="submitted");
@@ -474,7 +461,6 @@ function softUpdate(bl,hits,now){
       if(id&&ex)TC.set(id,{td,expiresMs:ex});}
   });
 }
-
 function x(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
 </script>
 </body>
