@@ -3,421 +3,354 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>MTurk HIT Tracker — Live Dashboard</title>
+<title>MTurk HIT Tracker — Live</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-/* ═══════════════════════════════════════════════
-   TOKENS
-═══════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════
+   DESIGN TOKENS
+═══════════════════════════════════════════════════════════ */
 :root{
-  --bg:       #060a14;
-  --bg1:      #090e1c;
-  --bg2:      #0d1525;
-  --bg3:      #111d30;
-  --border:   rgba(255,255,255,.06);
-  --border2:  rgba(255,255,255,.1);
-  --text:     #cdd6f4;
-  --text2:    #7c8db5;
-  --text3:    #3a4a6b;
-  --green:    #00e5a0;
-  --green2:   rgba(0,229,160,.12);
-  --blue:     #4fc3f7;
-  --blue2:    rgba(79,195,247,.12);
-  --amber:    #fbbf24;
-  --amber2:   rgba(251,191,36,.12);
-  --red:      #ff4d6d;
-  --red2:     rgba(255,77,109,.12);
-  --purple:   #c084fc;
-  --purple2:  rgba(192,132,252,.12);
-  --cyan:     #67e8f9;
-  --cyan2:    rgba(103,232,249,.12);
-  --orange:   #fb923c;
-  --orange2:  rgba(251,146,60,.12);
-  --mono:     'JetBrains Mono', monospace;
-  --sans:     'Outfit', sans-serif;
+  --bg:         #05080f;
+  --s0:         #080c17;
+  --s1:         #0b1120;
+  --s2:         #0f172a;
+  --s3:         #162036;
+  --bd:         rgba(255,255,255,.055);
+  --bd2:        rgba(255,255,255,.1);
+  --tx:         #c8d6f0;
+  --tx2:        #6b7fa8;
+  --tx3:        #2e3f60;
+  --green:      #00e5a0;
+  --gn2:        rgba(0,229,160,.1);
+  --gn3:        rgba(0,229,160,.2);
+  --blue:       #38bdf8;
+  --bl2:        rgba(56,189,248,.1);
+  --amber:      #fbbf24;
+  --am2:        rgba(251,191,36,.1);
+  --red:        #ff4060;
+  --rd2:        rgba(255,64,96,.1);
+  --orange:     #fb923c;
+  --or2:        rgba(251,146,60,.1);
+  --purple:     #a78bfa;
+  --pr2:        rgba(167,139,250,.1);
+  --cyan:       #22d3ee;
+  --cy2:        rgba(34,211,238,.1);
+  --mono:       'JetBrains Mono', monospace;
+  --sans:       'Syne', sans-serif;
 }
-
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
-body{font-family:var(--sans);background:var(--bg);color:var(--text);
-     min-height:100vh;font-size:13px;
-     background-image:
-       radial-gradient(ellipse 80% 50% at 50% -10%,rgba(0,229,160,.06),transparent),
-       radial-gradient(ellipse 40% 30% at 100% 50%,rgba(79,195,247,.04),transparent)}
-
-/* ═══ SCROLLBAR ═══ */
+body{
+  font-family:var(--sans);background:var(--bg);color:var(--tx);
+  min-height:100vh;font-size:13px;
+  background-image:
+    radial-gradient(ellipse 70% 40% at 50% -5%,rgba(0,229,160,.05),transparent),
+    radial-gradient(ellipse 50% 30% at 90% 80%,rgba(56,189,248,.04),transparent);
+}
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:var(--bg)}
-::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:3px}
+::-webkit-scrollbar-thumb{background:var(--s3);border-radius:3px}
 
-/* ═══ HEADER ═══ */
-header{
-  background:rgba(9,14,28,.95);
-  backdrop-filter:blur(20px);
-  border-bottom:1px solid var(--border);
-  padding:0 24px;
-  height:64px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:16px;
+/* ═══ HEADER ═══════════════════════════════════════════════ */
+.hdr{
   position:sticky;top:0;z-index:200;
+  background:rgba(8,12,23,.94);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--bd);
+  height:60px;
+  display:flex;align-items:center;
+  padding:0 22px;gap:16px;
 }
-
-.logo{
-  display:flex;align-items:center;gap:12px;flex-shrink:0;
-}
-.logo-icon{font-size:22px;line-height:1}
-.logo-text{
+.logo{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.logo-txt{
   font-family:var(--mono);font-size:13px;font-weight:700;
-  color:var(--text);letter-spacing:-.3px;
+  color:var(--tx);letter-spacing:-.4px;line-height:1.2;
 }
-.logo-text span{color:var(--green)}
-
-.live-chip{
-  display:inline-flex;align-items:center;gap:6px;
-  background:rgba(0,229,160,.1);
-  border:1px solid rgba(0,229,160,.25);
-  color:var(--green);font-family:var(--mono);
-  font-size:10px;font-weight:700;
-  padding:4px 12px;border-radius:20px;
-  letter-spacing:.5px;
+.logo-txt em{color:var(--green);font-style:normal}
+.badge-live{
+  display:inline-flex;align-items:center;gap:5px;
+  background:var(--gn2);border:1px solid var(--gn3);
+  color:var(--green);font-family:var(--mono);font-size:9px;font-weight:700;
+  padding:3px 9px;border-radius:20px;letter-spacing:.5px;
 }
-.live-dot{
+.dot{
   width:6px;height:6px;border-radius:50%;background:var(--green);
-  animation:livepulse 2s ease-in-out infinite;
+  animation:dp 2s ease-in-out infinite;flex-shrink:0;
 }
-@keyframes livepulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
-
-#clockDisplay{
-  font-family:var(--mono);font-size:11px;color:var(--text3);
-  white-space:nowrap;
-}
-
-/* ═══ CONTROL BAR ═══ */
-.controls{
-  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+@keyframes dp{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.65)}}
+#lastSync{font-family:var(--mono);font-size:10px;color:var(--tx3)}
+.clock{
+  font-family:var(--mono);font-size:13px;font-weight:600;
+  color:var(--tx2);letter-spacing:.5px;white-space:nowrap;
 }
 
-.ctrl{
+/* ═══ CONTROLS ════════════════════════════════════════════ */
+.ctrlbar{
   display:flex;align-items:center;gap:6px;
-  background:var(--bg2);border:1px solid var(--border);
-  border-radius:8px;padding:5px 12px;
-  transition:border-color .2s;
+  margin-left:auto;flex-wrap:wrap;
 }
-.ctrl:focus-within{border-color:var(--border2)}
-.ctrl label{
+.ctrl{
+  display:flex;align-items:center;gap:5px;
+  background:var(--s1);border:1px solid var(--bd);
+  border-radius:7px;padding:5px 10px;
+  transition:border-color .18s;cursor:default;
+}
+.ctrl:focus-within{border-color:var(--bd2)}
+.ctrl-lbl{
   font-family:var(--mono);font-size:9px;font-weight:600;
-  color:var(--text3);text-transform:uppercase;letter-spacing:.8px;
+  color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;
   white-space:nowrap;
 }
 .ctrl select{
-  background:transparent;border:none;
-  color:var(--text);font-family:var(--sans);font-size:12px;font-weight:500;
-  cursor:pointer;padding:0 4px;outline:none;
+  background:transparent;border:none;outline:none;
+  color:var(--tx);font-family:var(--sans);font-size:12px;font-weight:600;
   -webkit-appearance:none;appearance:none;
-  min-width:80px;
+  cursor:pointer;padding:0 2px;min-width:70px;
 }
-.ctrl select option{background:#111d30;color:var(--text)}
-
+.ctrl select option{background:#0f172a;color:var(--tx)}
 #hourCtrl{display:none}
 
-/* ═══ STATS STRIP ═══ */
+/* ═══ STATS ═══════════════════════════════════════════════ */
 .stats{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(130px,1fr));
-  gap:10px;padding:16px 24px;
+  grid-template-columns:repeat(auto-fit,minmax(128px,1fr));
+  gap:10px;padding:14px 22px;
 }
-
 .sc{
-  background:var(--bg1);border:1px solid var(--border);
-  border-radius:10px;padding:16px;position:relative;
-  overflow:hidden;transition:border-color .25s,transform .2s;
+  background:var(--s0);border:1px solid var(--bd);
+  border-radius:10px;padding:14px 16px;
+  position:relative;overflow:hidden;
+  transition:border-color .2s, transform .2s;
 }
-.sc:hover{transform:translateY(-2px);border-color:var(--border2)}
-.sc::after{
-  content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
-  border-radius:0 0 10px 10px;
+.sc:hover{border-color:var(--bd2);transform:translateY(-2px)}
+.sc::before{
+  content:'';position:absolute;
+  bottom:0;left:0;right:0;height:2px;
 }
-.sc.c-green::after{background:var(--green)}
-.sc.c-blue::after{background:var(--blue)}
-.sc.c-amber::after{background:var(--amber)}
-.sc.c-purple::after{background:var(--purple)}
-.sc.c-cyan::after{background:var(--cyan)}
-.sc.c-orange::after{background:var(--orange)}
-.sc.c-red::after{background:var(--red)}
-
+.sc.g::before{background:var(--green)}
+.sc.b::before{background:var(--blue)}
+.sc.a::before{background:var(--amber)}
+.sc.p::before{background:var(--purple)}
+.sc.c::before{background:var(--cyan)}
+.sc.o::before{background:var(--orange)}
+.sc.r::before{background:var(--red)}
 .sc-lbl{
   font-family:var(--mono);font-size:9px;font-weight:600;
-  color:var(--text3);text-transform:uppercase;letter-spacing:.8px;
-  margin-bottom:8px;
+  color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;
+  margin-bottom:7px;
 }
 .sc-val{
-  font-family:var(--mono);font-size:28px;font-weight:700;
-  line-height:1;color:var(--text);
-  transition:color .3s;
+  font-family:var(--mono);font-size:26px;font-weight:700;
+  line-height:1;color:var(--tx);
 }
-.sc.c-green .sc-val{color:var(--green)}
-.sc.c-amber .sc-val{color:var(--amber)}
-.sc.c-purple .sc-val{color:var(--purple)}
-.sc.c-orange .sc-val{color:var(--orange)}
-.sc.c-red .sc-val{color:var(--red)}
-.sc-sub{
-  font-size:10px;color:var(--text3);margin-top:4px;
-  font-family:var(--mono);
+.sc.g .sc-val{color:var(--green)}
+.sc.a .sc-val{color:var(--amber)}
+.sc.p .sc-val{color:var(--purple)}
+.sc.o .sc-val{color:var(--orange)}
+.sc.r .sc-val{color:var(--red)}
+.sc-sub{font-family:var(--mono);font-size:9px;color:var(--tx3);margin-top:4px}
+
+/* ═══ BODY ════════════════════════════════════════════════ */
+.body{padding:0 22px 40px}
+
+/* ═══ TEAM BLOCK ══════════════════════════════════════════ */
+.team{
+  background:var(--s0);border:1px solid var(--bd);
+  border-radius:11px;margin-bottom:12px;overflow:hidden;
+  transition:border-color .18s;
 }
-
-/* ═══ BODY ═══ */
-.body{padding:0 24px 40px}
-
-/* ═══ TEAM BLOCK ═══ */
-.team-block{
-  background:var(--bg1);border:1px solid var(--border);
-  border-radius:12px;margin-bottom:14px;overflow:hidden;
-  transition:border-color .2s;
-}
-.team-block:hover{border-color:var(--border2)}
-
+.team:hover{border-color:var(--bd2)}
 .team-hdr{
   display:flex;align-items:center;justify-content:space-between;
-  padding:11px 18px;background:var(--bg2);
-  border-bottom:1px solid var(--border);
-  cursor:pointer;user-select:none;gap:12px;flex-wrap:wrap;
-  transition:background .15s;
+  padding:10px 16px;background:var(--s1);
+  border-bottom:1px solid var(--bd);
+  cursor:pointer;user-select:none;gap:10px;flex-wrap:wrap;
+  transition:background .14s;
 }
-.team-hdr:hover{background:var(--bg3)}
-
+.team-hdr:hover{background:var(--s2)}
 .team-name{
-  font-family:var(--mono);font-size:13px;font-weight:700;
-  color:var(--cyan);display:flex;align-items:center;gap:8px;
-  min-width:0;
+  font-family:var(--mono);font-size:12px;font-weight:700;
+  color:var(--cyan);display:flex;align-items:center;gap:7px;
 }
-.team-toggle{
-  font-size:9px;color:var(--text3);
-  transition:transform .2s;flex-shrink:0;
-}
-.team-block.collapsed .team-toggle{transform:rotate(-90deg)}
-.team-block.collapsed .team-table-wrap{display:none}
-
-.team-pills{
-  display:flex;gap:6px;flex-wrap:wrap;align-items:center;
-}
+.chevron{font-size:9px;color:var(--tx3);transition:transform .18s;flex-shrink:0}
+.team.collapsed .chevron{transform:rotate(-90deg)}
+.team.collapsed .team-body{display:none}
+.pills{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
 .pill{
-  font-family:var(--mono);font-size:10px;font-weight:700;
-  padding:2px 10px;border-radius:20px;white-space:nowrap;
-  letter-spacing:.2px;
+  font-family:var(--mono);font-size:9px;font-weight:700;
+  padding:2px 9px;border-radius:20px;white-space:nowrap;letter-spacing:.2px;
 }
-.p-act  {background:var(--green2);color:var(--green); border:1px solid rgba(0,229,160,.2)}
-.p-sub  {background:var(--blue2); color:var(--blue);  border:1px solid rgba(79,195,247,.2)}
-.p-mret {background:var(--orange2);color:var(--orange);border:1px solid rgba(251,146,60,.2)}
-.p-aret {background:var(--red2);  color:var(--red);   border:1px solid rgba(255,77,109,.2)}
-.p-earn {background:var(--amber2);color:var(--amber); border:1px solid rgba(251,191,36,.2)}
+.pa{background:var(--gn2);color:var(--green); border:1px solid rgba(0,229,160,.18)}
+.ps{background:var(--bl2);color:var(--blue);  border:1px solid rgba(56,189,248,.18)}
+.pm{background:var(--or2);color:var(--orange);border:1px solid rgba(251,146,60,.18)}
+.pp{background:var(--rd2);color:var(--red);   border:1px solid rgba(255,64,96,.18)}
+.pe{background:var(--am2);color:var(--amber); border:1px solid rgba(251,191,36,.18)}
 
-/* ═══ TABLE ═══ */
-.team-table-wrap{overflow-x:auto}
-
+/* ═══ TABLE ═══════════════════════════════════════════════ */
+.team-wrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse}
 thead th{
-  background:rgba(5,7,15,.8);padding:8px 14px;
-  font-family:var(--mono);font-size:9px;color:var(--text3);
-  text-transform:uppercase;letter-spacing:.6px;font-weight:600;
-  text-align:left;border-bottom:1px solid var(--border);
-  white-space:nowrap;
+  background:rgba(4,6,12,.8);padding:7px 13px;
+  font-family:var(--mono);font-size:9px;font-weight:600;
+  color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;
+  text-align:left;border-bottom:1px solid var(--bd);white-space:nowrap;
 }
-tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
+tbody tr{border-bottom:1px solid var(--bd);transition:background .1s}
 tbody tr:last-child{border-bottom:none}
-tbody tr:hover{background:rgba(255,255,255,.02)}
-tbody td{padding:9px 14px;vertical-align:middle}
+tbody tr:hover{background:rgba(255,255,255,.018)}
+tbody td{padding:8px 13px;vertical-align:middle}
 
-/* Cell types */
-.c-wid {font-family:var(--mono);font-size:11px;color:var(--text3)}
-.c-name{font-weight:600;color:var(--text);font-size:13px}
-.c-req {color:var(--blue);font-weight:600;font-size:12px;white-space:nowrap}
-.c-title{
-  max-width:220px;overflow:hidden;text-overflow:ellipsis;
-  white-space:nowrap;font-size:12px;color:var(--text2)
-}
-.c-rew {font-family:var(--mono);color:var(--amber);font-weight:700;font-size:13px}
-.c-time{font-size:11px;color:var(--text2);white-space:nowrap}
+.cw{font-family:var(--mono);font-size:10px;color:var(--tx2)}
+.cn{font-weight:700;color:var(--tx);font-size:13px}
+.cr{color:var(--blue);font-weight:700;font-size:12px;white-space:nowrap}
+.ct{max-width:210px;overflow:hidden;text-overflow:ellipsis;
+    white-space:nowrap;font-size:12px;color:var(--tx2)}
+.cv{font-family:var(--mono);color:var(--amber);font-weight:700;font-size:12px}
+.ca{font-size:11px;color:var(--tx2);white-space:nowrap}
 
 /* Status badges */
 .badge{
-  font-family:var(--mono);font-size:10px;font-weight:700;
-  padding:3px 10px;border-radius:20px;
-  text-transform:uppercase;letter-spacing:.3px;white-space:nowrap;
-  display:inline-block;
+  font-family:var(--mono);font-size:9px;font-weight:700;
+  padding:3px 9px;border-radius:20px;text-transform:uppercase;
+  letter-spacing:.3px;white-space:nowrap;display:inline-block;
 }
-.b-active         {background:var(--green2);color:var(--green); border:1px solid rgba(0,229,160,.3)}
-.b-submitted      {background:var(--blue2); color:var(--blue);  border:1px solid rgba(79,195,247,.3)}
-.b-manual_returned{background:var(--orange2);color:var(--orange);border:1px solid rgba(251,146,60,.3)}
-.b-auto_returned  {background:var(--red2);  color:var(--red);   border:1px solid rgba(255,77,109,.3)}
-.b-timed_out      {background:rgba(60,70,90,.3);color:var(--text3);border:1px solid var(--border)}
+.active{background:var(--gn2);color:var(--green);border:1px solid rgba(0,229,160,.25)}
+.submitted{background:var(--bl2);color:var(--blue);border:1px solid rgba(56,189,248,.25)}
+.manual_returned{background:var(--or2);color:var(--orange);border:1px solid rgba(251,146,60,.25)}
+.auto_returned{background:var(--rd2);color:var(--red);border:1px solid rgba(255,64,96,.25)}
+.timed_out{background:rgba(40,50,70,.4);color:var(--tx3);border:1px solid var(--bd)}
 
-/* Time-left cell  — updated ONLY by the ticker, not on re-render */
+/* Time-left cell */
 .tl{font-family:var(--mono);font-size:12px;font-weight:700;white-space:nowrap}
-.tl-ok    {color:var(--green)}
-.tl-warn  {color:var(--amber)}
-.tl-danger{color:var(--red);animation:dangerblink .7s infinite}
-.tl-exp   {color:var(--text3)}
-@keyframes dangerblink{0%,100%{opacity:1}50%{opacity:.25}}
+.tok {color:var(--green)}
+.twn {color:var(--amber)}
+.tdg {color:var(--red);animation:blink .65s infinite}
+.txx {color:var(--tx3)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
 
-/* ═══ EMPTY / LOADING ═══ */
+/* Empty state */
 .empty{
-  text-align:center;padding:64px 24px;
-  font-family:var(--mono);color:var(--text3);font-size:13px;
+  text-align:center;padding:60px 24px;
+  font-family:var(--mono);color:var(--tx3);
 }
-.empty-icon{font-size:40px;margin-bottom:14px;opacity:.6}
-.empty-msg{color:var(--text2);margin-top:6px;font-size:12px}
-
-/* ═══ STATUS BAR ═══ */
-.statusbar{
-  display:flex;align-items:center;gap:8px;
-  padding:0 24px 0 0;
-}
-#statusMsg{font-family:var(--mono);font-size:10px;color:var(--text3)}
-
-/* ═══ RESPONSIVE ═══ */
-@media(max-width:640px){
-  header{height:auto;padding:12px 16px;flex-wrap:wrap}
-  .stats,.body{padding-left:16px;padding-right:16px}
-  .stats{grid-template-columns:repeat(2,1fr)}
-}
+.empty-icon{font-size:36px;margin-bottom:12px;opacity:.5}
 </style>
 </head>
 <body>
 
-<!-- ══ HEADER ══════════════════════════════════════════ -->
-<header>
+<!-- ═══ HEADER ════════════════════════════════════════════ -->
+<div class="hdr">
   <div class="logo">
-    <span class="logo-icon">📡</span>
-    <div>
-      <div class="logo-text">MTurk HIT Tracker <span>// LIVE</span></div>
-      <div style="display:flex;align-items:center;gap:8px;margin-top:3px">
-        <span class="live-chip"><span class="live-dot"></span>REAL-TIME</span>
-        <span id="statusMsg">Connecting…</span>
-      </div>
+    <div class="logo-txt">📡 MTurk HIT Tracker <em>// LIVE</em></div>
+  </div>
+  <span class="badge-live"><span class="dot"></span>REAL-TIME</span>
+  <span id="lastSync">Connecting…</span>
+  <span class="clock" id="clk"></span>
+
+  <div class="ctrlbar">
+    <!-- Frequency -->
+    <div class="ctrl">
+      <span class="ctrl-lbl">VIEW</span>
+      <select id="freqSel" onchange="onFreqChange()">
+        <option value="hourly">Hourly</option>
+        <option value="daily">Daily</option>
+        <option value="monthly">Monthly</option>
+        <option value="yearly">Yearly</option>
+      </select>
+    </div>
+    <!-- Hour sub-select -->
+    <div class="ctrl" id="hourCtrl">
+      <span class="ctrl-lbl">HRS</span>
+      <select id="hrSel" onchange="applyFilters()">
+        <option value="1">1 hr</option>
+        <option value="2">2 hr</option>
+        <option value="3">3 hr</option>
+        <option value="4">4 hr</option>
+        <option value="6">6 hr</option>
+        <option value="8">8 hr</option>
+        <option value="12">12 hr</option>
+      </select>
+    </div>
+    <!-- Team -->
+    <div class="ctrl">
+      <span class="ctrl-lbl">TEAM</span>
+      <select id="teamSel" onchange="applyFilters()">
+        <option value="">All Teams</option>
+      </select>
+    </div>
+    <!-- Worker -->
+    <div class="ctrl">
+      <span class="ctrl-lbl">WORKER</span>
+      <select id="wrkSel" onchange="applyFilters()">
+        <option value="">All Workers</option>
+      </select>
+    </div>
+    <!-- Status -->
+    <div class="ctrl">
+      <span class="ctrl-lbl">STATUS</span>
+      <select id="stsSel" onchange="applyFilters()">
+        <option value="">All</option>
+        <option value="active">Active</option>
+        <option value="manual_returned">M Return</option>
+        <option value="auto_returned">A Return</option>
+        <option value="timed_out">Timed Out</option>
+      </select>
     </div>
   </div>
+</div>
 
-  <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-    <span id="clockDisplay"></span>
-
-    <div class="controls">
-
-      <!-- Frequency / time range -->
-      <div class="ctrl">
-        <label>View</label>
-        <select id="freqSel" onchange="onFreqChange()">
-          <option value="hourly">Hourly</option>
-          <option value="daily">Daily</option>
-          <option value="monthly">Monthly</option>
-          <option value="yearly">Yearly</option>
-        </select>
-      </div>
-
-      <!-- Hour sub-selector (1-12), shown only when Hourly -->
-      <div class="ctrl" id="hourCtrl">
-        <label>Hours</label>
-        <select id="hourSel" onchange="applyFilters()">
-          <option value="1">1 hr</option>
-          <option value="2">2 hr</option>
-          <option value="3">3 hr</option>
-          <option value="4">4 hr</option>
-          <option value="6">6 hr</option>
-          <option value="8">8 hr</option>
-          <option value="12">12 hr</option>
-        </select>
-      </div>
-
-      <!-- Team -->
-      <div class="ctrl">
-        <label>Team</label>
-        <select id="teamSel" onchange="applyFilters()">
-          <option value="">All Teams</option>
-        </select>
-      </div>
-
-      <!-- Worker -->
-      <div class="ctrl">
-        <label>Worker</label>
-        <select id="workerSel" onchange="applyFilters()">
-          <option value="">All Workers</option>
-        </select>
-      </div>
-
-      <!-- Status -->
-      <div class="ctrl">
-        <label>Status</label>
-        <select id="statusSel" onchange="applyFilters()">
-          <option value="">All</option>
-          <option value="active">Active</option>
-          <option value="submitted">Submitted</option>
-          <option value="manual_returned">M Return</option>
-          <option value="auto_returned">A Return</option>
-          <option value="timed_out">Timed Out</option>
-        </select>
-      </div>
-
-    </div>
-  </div>
-</header>
-
-<!-- ══ STATS ═══════════════════════════════════════════ -->
+<!-- ═══ STATS ════════════════════════════════════════════ -->
 <div class="stats">
-  <div class="sc c-green">
+  <div class="sc g">
     <div class="sc-lbl">Active Now</div>
-    <div class="sc-val" id="sActive">—</div>
-    <div class="sc-sub" id="sActiveSub">workers in queue</div>
+    <div class="sc-val" id="sAct">—</div>
+    <div class="sc-sub" id="sActSub">workers in queue</div>
   </div>
-  <div class="sc c-blue">
+  <div class="sc b">
     <div class="sc-lbl">Total HITs</div>
     <div class="sc-val" id="sTotal">—</div>
   </div>
-  <div class="sc c-amber">
+  <div class="sc a">
     <div class="sc-lbl">Earned ($)</div>
     <div class="sc-val" id="sEarned">—</div>
     <div class="sc-sub">submitted only</div>
   </div>
-  <div class="sc c-purple">
+  <div class="sc p">
     <div class="sc-lbl">Workers</div>
-    <div class="sc-val" id="sWorkers">—</div>
+    <div class="sc-val" id="sWrk">—</div>
   </div>
-  <div class="sc c-cyan" style="--cyan2:rgba(103,232,249,.12)">
+  <div class="sc c">
     <div class="sc-lbl">Teams</div>
-    <div class="sc-val" id="sTeams" style="color:var(--cyan)">—</div>
+    <div class="sc-val" id="sTms" style="color:var(--cyan)">—</div>
   </div>
-  <div class="sc c-blue">
+  <div class="sc b">
     <div class="sc-lbl">Submitted</div>
     <div class="sc-val" id="sSub">—</div>
   </div>
-  <div class="sc c-orange">
+  <div class="sc o">
     <div class="sc-lbl">M Returns</div>
-    <div class="sc-val" id="sMRet">—</div>
+    <div class="sc-val" id="sMR">—</div>
     <div class="sc-sub">manual</div>
   </div>
-  <div class="sc c-red">
+  <div class="sc r">
     <div class="sc-lbl">A Returns</div>
-    <div class="sc-val" id="sARet">—</div>
+    <div class="sc-val" id="sAR">—</div>
     <div class="sc-sub">auto</div>
   </div>
 </div>
 
-<!-- ══ TEAM BLOCKS ══════════════════════════════════════ -->
+<!-- ═══ TEAM BLOCKS ═══════════════════════════════════════ -->
 <div class="body" id="body">
-  <div class="empty">
-    <div class="empty-icon">⏳</div>
-    Loading HITs from Firebase…
-  </div>
+  <div class="empty"><div class="empty-icon">⏳</div>Loading from Firebase…</div>
 </div>
 
-<!-- ══ FIREBASE + LOGIC ════════════════════════════════ -->
 <script type="module">
 import { initializeApp }    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, query, orderBy, onSnapshot, doc, setDoc }
-                            from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-/* ── Firebase init ── */
+/* ── Firebase ── */
 const db = getFirestore(initializeApp({
   apiKey:            "AIzaSyBKiMs4NnvLrjpPvKQUS0GzHFMim1wIGng",
   authDomain:        "manitasks-2471b.firebaseapp.com",
@@ -427,55 +360,44 @@ const db = getFirestore(initializeApp({
   appId:             "1:889596390115:web:024527c2a5ed98fbc473d6"
 }));
 
-/* ══════════════════════════════════════════════════════
-   STATE
-══════════════════════════════════════════════════════ */
-let allHits       = [];          // raw Firebase docs
-let renderPending = false;
+/* ─── STATE ─────────────────────────────────────────────── */
+let allHits = [];
+let dirty   = false;   // flag: re-render needed
 
-/* Map of assignmentId → { el: HTMLElement, expiresAt: ms }
-   Used by the second-ticker to update only time cells   */
-const timeCells = new Map();
+/* Map of assignmentId → DOM <td> element for time-left cell.
+   The 1-second ticker ONLY updates these cells — no re-render. */
+const timeCells = new Map();   // id → { td, expiresMs }
 
-/* ══════════════════════════════════════════════════════
-   CLOCK
-══════════════════════════════════════════════════════ */
-function updateClock() {
-  document.getElementById("clockDisplay").textContent =
-    new Date().toLocaleTimeString([], { hour12: false });
-}
-updateClock();
-setInterval(updateClock, 1000);
+/* ─── CLOCK ─────────────────────────────────────────────── */
+(function tickClock() {
+  document.getElementById("clk").textContent =
+    new Date().toLocaleTimeString([], { hour12:false });
+  setTimeout(tickClock, 1000 - Date.now() % 1000);
+})();
 
-/* ══════════════════════════════════════════════════════
-   SECOND TICKER — updates ONLY time-left cells
-   No full re-render. No lag.
-══════════════════════════════════════════════════════ */
+/* ─── SECOND TICKER — only touches time cells ────────────── */
 setInterval(() => {
   const now = Date.now();
   timeCells.forEach((data, id) => {
-    // Remove stale references (element no longer in DOM)
-    if (!document.contains(data.el)) { timeCells.delete(id); return; }
-    const diff = data.expiresAt - now;
-    data.el.innerHTML = buildTLHtml(diff);
+    if (!document.contains(data.td)) { timeCells.delete(id); return; }
+    data.td.innerHTML = tlHtml(data.expiresMs - now);
   });
 }, 1000);
 
-/* ══════════════════════════════════════════════════════
-   FIREBASE REAL-TIME LISTENER
-══════════════════════════════════════════════════════ */
+/* ─── FIREBASE LISTENER ─────────────────────────────────── */
 onSnapshot(
-  query(collection(db, "hits"), orderBy("acceptedAt", "desc")),
+  query(collection(db,"hits"), orderBy("acceptedAt","desc")),
   snap => {
-    allHits = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    allHits = snap.docs.map(d => ({ id:d.id, ...d.data() }));
     autoExpire();
-    scheduleRender();
-    document.getElementById("statusMsg").textContent =
-      "Last sync: " + new Date().toLocaleTimeString();
     rebuildDropdowns();
+    dirty = true;
+    requestAnimationFrame(() => { if (dirty) { dirty = false; applyFilters(); } });
+    document.getElementById("lastSync").textContent =
+      "Last sync: " + new Date().toLocaleTimeString();
   },
   err => {
-    document.getElementById("statusMsg").textContent = "⚠️ " + err.message;
+    document.getElementById("lastSync").textContent = "⚠️ " + err.message;
   }
 );
 
@@ -483,339 +405,277 @@ onSnapshot(
 function autoExpire() {
   const now = new Date();
   allHits.forEach(h => {
-    if (h.status === "active" && h.expiresAt && new Date(h.expiresAt) < now) {
+    if (h.status==="active" && h.expiresAt && new Date(h.expiresAt)<now) {
       h.status = "timed_out";
-      setDoc(doc(db, "hits", h.id), { status:"timed_out", timedOutAt:now.toISOString() }, { merge:true })
-        .catch(() => {});
+      setDoc(doc(db,"hits",h.id),
+        { status:"timed_out", timedOutAt:now.toISOString() },
+        { merge:true }).catch(()=>{});
     }
   });
 }
 
-/* Batched render via rAF to avoid thrashing */
-function scheduleRender() {
-  if (renderPending) return;
-  renderPending = true;
-  requestAnimationFrame(() => { renderPending = false; applyFilters(); });
+/* ─── DROPDOWNS ─────────────────────────────────────────── */
+function rebuildDropdowns() {
+  const teams   = [...new Set(allHits.map(h => h.teamname||"No Team"))].sort();
+  const workers = [...new Set(allHits.map(h => h.username||h.workerId||"?"))].sort();
+  fill("teamSel", teams,   "All Teams");
+  fill("wrkSel",  workers, "All Workers");
+}
+function fill(id, items, ph) {
+  const sel = document.getElementById(id), cur = sel.value;
+  sel.innerHTML = `<option value="">${x(ph)}</option>` +
+    items.map(v => `<option value="${x(v)}"${v===cur?" selected":""}>${x(v)}</option>`).join("");
 }
 
-/* ══════════════════════════════════════════════════════
-   FREQUENCY CHANGE  — show/hide hour sub-select
-══════════════════════════════════════════════════════ */
-window.onFreqChange = function () {
-  const freq = document.getElementById("freqSel").value;
+/* ─── FREQUENCY CHANGE ───────────────────────────────────── */
+window.onFreqChange = () => {
   document.getElementById("hourCtrl").style.display =
-    freq === "hourly" ? "flex" : "none";
+    document.getElementById("freqSel").value === "hourly" ? "flex" : "none";
   applyFilters();
 };
 
-/* ══════════════════════════════════════════════════════
-   FILTERS → RENDER
-══════════════════════════════════════════════════════ */
+/* ─── FILTERS ────────────────────────────────────────────── */
 window.applyFilters = function () {
-  const freq    = document.getElementById("freqSel").value;
-  const hours   = parseInt(document.getElementById("hourSel").value || "1");
-  const teamF   = document.getElementById("teamSel").value;
-  const workerF = document.getElementById("workerSel").value;
-  const statusF = document.getElementById("statusSel").value;
-  const now     = new Date();
+  const freq  = document.getElementById("freqSel").value;
+  const hrs   = parseInt(document.getElementById("hrSel").value || "1");
+  const team  = document.getElementById("teamSel").value;
+  const wrk   = document.getElementById("wrkSel").value;
+  const sts   = document.getElementById("stsSel").value;
+  const now   = new Date();
 
-  /* Compute cutoff based on frequency */
-  let cutMs = 0;
-  if (freq === "hourly")  cutMs = hours * 3600_000;
-  if (freq === "daily")   cutMs = 86400_000;
-  if (freq === "monthly") cutMs = 30 * 86400_000;
-  if (freq === "yearly")  cutMs = 365 * 86400_000;
+  const MS = { hourly: hrs*3600_000, daily:86400_000, monthly:30*86400_000, yearly:365*86400_000 };
+  const cut = MS[freq] ? new Date(now - MS[freq]) : null;
 
   let hits = allHits;
-
-  if (cutMs > 0) {
-    const cut = new Date(now - cutMs);
-    hits = hits.filter(h => h.acceptedAt && new Date(h.acceptedAt) >= cut);
-  }
-  if (teamF)   hits = hits.filter(h => (h.teamname  || "No Team") === teamF);
-  if (workerF) hits = hits.filter(h => (h.username  || h.workerId) === workerF);
-  if (statusF) hits = hits.filter(h => h.status === statusF);
+  if (cut)  hits = hits.filter(h => h.acceptedAt && new Date(h.acceptedAt) >= cut);
+  if (team) hits = hits.filter(h => (h.teamname||"No Team") === team);
+  if (wrk)  hits = hits.filter(h => (h.username||h.workerId) === wrk);
+  if (sts)  hits = hits.filter(h => h.status === sts);
 
   renderStats(hits, now);
   renderTeams(hits, now);
 };
 
-/* ══════════════════════════════════════════════════════
-   DROPDOWNS
-══════════════════════════════════════════════════════ */
-function rebuildDropdowns() {
-  const teams   = [...new Set(allHits.map(h => h.teamname  || "No Team"))].sort();
-  const workers = [...new Set(allHits.map(h => h.username  || h.workerId || "?"))].sort();
-  fillSelect("teamSel",   teams,   "All Teams");
-  fillSelect("workerSel", workers, "All Workers");
-}
-
-function fillSelect(id, items, placeholder) {
-  const sel = document.getElementById(id);
-  const cur = sel.value;
-  sel.innerHTML = `<option value="">${x(placeholder)}</option>` +
-    items.map(v => `<option value="${x(v)}"${v===cur?" selected":""}>${x(v)}</option>`).join("");
-}
-
-/* ══════════════════════════════════════════════════════
-   STATS
-══════════════════════════════════════════════════════ */
+/* ─── STATS ──────────────────────────────────────────────── */
 function renderStats(hits, now) {
-  const active  = hits.filter(h => h.status==="active" && new Date(h.expiresAt||0) > now);
-  const sub     = hits.filter(h => h.status==="submitted");
-  const mRet    = hits.filter(h => h.status==="manual_returned");
-  const aRet    = hits.filter(h => h.status==="auto_returned");
-  const earned  = sub.reduce((s,h) => s + (parseFloat(h.reward)||0), 0);
-  const workers = new Set(hits.map(h => h.workerId)).size;
-  const teams   = new Set(hits.map(h => h.teamname||"No Team")).size;
-  const actW    = new Set(active.map(h => h.workerId)).size;
+  const act   = hits.filter(h => h.status==="active" && new Date(h.expiresAt||0)>now);
+  const sub   = hits.filter(h => h.status==="submitted");
+  const mRet  = hits.filter(h => h.status==="manual_returned");
+  const aRet  = hits.filter(h => h.status==="auto_returned");
+  const earn  = sub.reduce((s,h) => s+(parseFloat(h.reward)||0), 0);
+  const actW  = new Set(act.map(h => h.workerId)).size;
+  const allW  = new Set(hits.map(h => h.workerId)).size;
+  const allTm = new Set(hits.map(h => h.teamname||"No Team")).size;
 
-  setText("sActive",    actW);
-  setText("sActiveSub", active.length + " active HIT" + (active.length!==1?"s":""));
-  setText("sTotal",     hits.length);
-  setText("sEarned",    "$" + earned.toFixed(2));
-  setText("sWorkers",   workers);
-  setText("sTeams",     teams);
-  setText("sSub",       sub.length);
-  setText("sMRet",      mRet.length);
-  setText("sARet",      aRet.length);
+  setText("sAct",    actW);
+  setText("sActSub", act.length + " active HIT" + (act.length!==1?"s":""));
+  setText("sTotal",  hits.length);
+  setText("sEarned", "$" + earn.toFixed(2));
+  setText("sWrk",    allW);
+  setText("sTms",    allTm);
+  setText("sSub",    sub.length);
+  setText("sMR",     mRet.length);
+  setText("sAR",     aRet.length);
 }
-
-function setText(id, v) {
+function setText(id,v) {
   const el = document.getElementById(id);
   if (el && el.textContent !== String(v)) el.textContent = v;
 }
 
-/* ══════════════════════════════════════════════════════
-   TEAM BLOCKS
-══════════════════════════════════════════════════════ */
+/* ─── TEAMS RENDER ───────────────────────────────────────── */
 function renderTeams(hits, now) {
   const body = document.getElementById("body");
-
   if (!hits.length) {
     timeCells.clear();
-    body.innerHTML = `<div class="empty">
-      <div class="empty-icon">🔍</div>
-      No HITs found for the selected filters.
-      <div class="empty-msg">Try changing the time range or clearing filters.</div>
-    </div>`;
+    body.innerHTML = `<div class="empty"><div class="empty-icon">🔍</div>No HITs for this filter.</div>`;
     return;
   }
 
-  /* Group by team */
-  const byTeam = new Map();
+  /* Group by team, sort A→Z */
+  const map = new Map();
   hits.forEach(h => {
-    const t = h.teamname || "No Team";
-    if (!byTeam.has(t)) byTeam.set(t, []);
-    byTeam.get(t).push(h);
+    const t = h.teamname||"No Team";
+    if (!map.has(t)) map.set(t, []);
+    map.get(t).push(h);
   });
+  const teamOrder = [...map.keys()].sort((a,b) => a.localeCompare(b));
 
-  /* Preserve collapsed state */
+  /* Save collapse state */
   const collapsed = new Set(
-    [...body.querySelectorAll(".team-block.collapsed")]
-      .map(el => el.dataset.team)
+    [...body.querySelectorAll(".team.collapsed")].map(el => el.dataset.team)
   );
 
-  /* Smart update: if same teams, update rows in-place.
-     Otherwise full replace (avoids unnecessary reflows). */
-  const currentTeams = [...body.querySelectorAll(".team-block")].map(el => el.dataset.team);
-  const newTeams     = [...byTeam.keys()].sort((a,b) => a.localeCompare(b));
-  const needFullRender = currentTeams.join(",") !== newTeams.join(",");
+  /* Check if team list changed → need full rebuild */
+  const curTeams = [...body.querySelectorAll(".team")].map(el => el.dataset.team).join("|");
+  const newTeams = teamOrder.join("|");
 
-  if (needFullRender) {
-    /* Build fragment */
-    const frag = document.createDocumentFragment();
-    newTeams.forEach(team => {
-      const el = buildTeamBlock(team, byTeam.get(team), now, collapsed.has(team));
-      frag.appendChild(el);
-    });
-
-    /* Clear stale time cell refs */
+  if (curTeams !== newTeams) {
+    /* Full rebuild */
     timeCells.clear();
+    const frag = document.createDocumentFragment();
+    teamOrder.forEach(t => {
+      frag.appendChild(buildTeam(t, map.get(t), now, collapsed.has(t)));
+    });
     body.innerHTML = "";
     body.appendChild(frag);
-
-    /* Register time cells */
-    body.querySelectorAll("td[data-expires]").forEach(td => {
-      const id = td.dataset.assignment;
-      const ex = parseInt(td.dataset.expires) || 0;
-      if (id && ex) timeCells.set(id, { el: td, expiresAt: ex });
-    });
-
-    /* Collapse toggle */
-    body.querySelectorAll(".team-hdr").forEach(hdr => {
-      hdr.addEventListener("click", () =>
-        hdr.closest(".team-block").classList.toggle("collapsed"));
-    });
-
+    registerTimeCells(body);
+    attachToggles(body);
   } else {
-    /* Soft update: only refresh time-left cells that changed */
-    /* (Stats + pill counts are updated separately above) */
-    newTeams.forEach(team => {
-      const block = body.querySelector(`.team-block[data-team="${CSS.escape(team)}"]`);
+    /* Soft update: pills + status badges only (timer cells handled by ticker) */
+    teamOrder.forEach(t => {
+      const block = body.querySelector(`.team[data-team="${CSS.escape(t)}"]`);
       if (!block) return;
-      const teamHits = byTeam.get(team);
-      updatePills(block, teamHits, now);
-      updateTableRows(block, teamHits, now);
+      softUpdate(block, map.get(t), now);
     });
   }
 }
 
-/* ── Build a full team block element ── */
-function buildTeamBlock(team, hits, now, isCollapsed) {
-  const el = document.createElement("div");
-  el.className  = "team-block" + (isCollapsed ? " collapsed" : "");
-  el.dataset.team = team;
+/* ─── BUILD TEAM BLOCK ───────────────────────────────────── */
+function buildTeam(team, hits, now, isCollapsed) {
+  const act  = hits.filter(h => h.status==="active" && new Date(h.expiresAt||0)>now);
+  const sub  = hits.filter(h => h.status==="submitted");
+  const mR   = hits.filter(h => h.status==="manual_returned");
+  const aR   = hits.filter(h => h.status==="auto_returned");
+  const earn = sub.reduce((s,h)=>s+(parseFloat(h.reward)||0),0);
 
-  const active  = hits.filter(h => h.status==="active" && new Date(h.expiresAt||0) > now);
-  const sub     = hits.filter(h => h.status==="submitted");
-  const mRet    = hits.filter(h => h.status==="manual_returned");
-  const aRet    = hits.filter(h => h.status==="auto_returned");
-  const earned  = sub.reduce((s,h) => s + (parseFloat(h.reward)||0), 0);
+  const el   = document.createElement("div");
+  el.className  = "team" + (isCollapsed?" collapsed":"");
+  el.dataset.team = team;
 
   el.innerHTML = `
   <div class="team-hdr">
     <div class="team-name">
-      <span class="team-toggle">▾</span>
+      <span class="chevron">▾</span>
       🏷 ${x(team)}
-      <span style="color:var(--text3);font-size:10px;font-weight:400">(${hits.length})</span>
+      <span style="color:var(--tx3);font-size:9px;font-weight:500">(${hits.length})</span>
     </div>
-    <div class="team-pills">
-      <span class="pill p-act">🟢 ${active.length} Active</span>
-      <span class="pill p-sub">✓ ${sub.length} Done</span>
-      <span class="pill p-mret">↩ M:${mRet.length}</span>
-      <span class="pill p-aret">⟲ A:${aRet.length}</span>
-      <span class="pill p-earn">$ ${earned.toFixed(2)}</span>
+    <div class="pills">
+      <span class="pill pa">🟢 ${act.length}</span>
+      <span class="pill ps">✓ ${sub.length}</span>
+      <span class="pill pm">↩M:${mR.length}</span>
+      <span class="pill pp">⟲A:${aR.length}</span>
+      <span class="pill pe">$${earn.toFixed(2)}</span>
     </div>
   </div>
-  <div class="team-table-wrap">
-    <table>
-      <thead><tr>
-        <th>Worker ID</th><th>Username</th><th>Requester</th>
-        <th>Title</th><th>Reward</th><th>Accepted</th>
-        <th>Time Left</th><th>Status</th>
-      </tr></thead>
-      <tbody>${hits.map(h => buildRow(h, now)).join("")}</tbody>
-    </table>
+  <div class="team-body">
+    <div class="team-wrap">
+      <table>
+        <thead><tr>
+          <th>Worker ID</th><th>Username</th><th>Requester</th>
+          <th>Title</th><th>Reward</th><th>Accepted</th>
+          <th>Time Left</th><th>Status</th>
+        </tr></thead>
+        <tbody>${hits.map(h=>buildRow(h,now)).join("")}</tbody>
+      </table>
+    </div>
   </div>`;
-
   return el;
 }
 
-/* ── Build one table row ── */
+/* ─── BUILD ROW ─────────────────────────────────────────── */
 function buildRow(h, now) {
   const acc    = h.acceptedAt ? new Date(h.acceptedAt) : null;
   const accStr = acc
-    ? acc.toLocaleDateString() + " " +
-      acc.toLocaleTimeString([], { hour:"2-digit", minute:"2-digit", second:"2-digit", hour12:false })
+    ? acc.toLocaleDateString("en-GB") + " " +
+      acc.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false})
     : "—";
 
-  const exMs   = h.expiresAt ? new Date(h.expiresAt).getTime() : 0;
-  const diff   = exMs - now.getTime();
-  const isAct  = h.status === "active" && diff > 0;
+  const exMs  = h.expiresAt ? new Date(h.expiresAt).getTime() : 0;
+  const diff  = exMs - now.getTime();
+  const isAct = h.status === "active" && diff > 0;
 
-  const tlAttr = isAct
-    ? `data-expires="${exMs}" data-assignment="${x(h.id)}"`
-    : "";
+  /* data- attrs used by ticker and registration */
+  const tdAttr = isAct
+    ? `class="tl-cell" data-exp="${exMs}" data-id="${x(h.id)}"`
+    : `class="tl-cell"`;
 
-  const LABELS = {
-    active:"Active", submitted:"Submitted",
-    manual_returned:"M Return", auto_returned:"A Return", timed_out:"Timed Out"
+  const LABEL = {
+    active:"Active",submitted:"Submitted",
+    manual_returned:"M Return",auto_returned:"A Return",timed_out:"Timed Out"
   };
 
   return `<tr>
-    <td class="c-wid">${x(h.workerId||"—")}</td>
-    <td class="c-name">${x(h.username||"Unknown")}</td>
-    <td class="c-req">${x(h.requester||"—")}</td>
-    <td><div class="c-title" title="${x(h.title||"")}">${x(h.title||"—")}</div></td>
-    <td class="c-rew">$${(parseFloat(h.reward)||0).toFixed(2)}</td>
-    <td class="c-time">${accStr}</td>
-    <td ${tlAttr}>${isAct ? buildTLHtml(diff) : `<span class="tl tl-exp">—</span>`}</td>
-    <td><span class="badge b-${h.status||"active"}">${LABELS[h.status]||h.status||"Active"}</span></td>
+    <td class="cw">${x(h.workerId||"—")}</td>
+    <td class="cn">${x(h.username||"Unknown")}</td>
+    <td class="cr">${x(h.requester||"—")}</td>
+    <td><div class="ct" title="${x(h.title||"")}">${x(h.title||"—")}</div></td>
+    <td class="cv">$${(parseFloat(h.reward)||0).toFixed(2)}</td>
+    <td class="ca">${accStr}</td>
+    <td ${tdAttr}>${isAct ? tlHtml(diff) : `<span class="tl txx">—</span>`}</td>
+    <td><span class="badge ${h.status||"active"}">${LABEL[h.status]||h.status||"Active"}</span></td>
   </tr>`;
 }
 
-/* ── Build time-left HTML ── */
-function buildTLHtml(diff) {
-  if (diff <= 0) return `<span class="tl tl-exp">Expired</span>`;
-  const h   = Math.floor(diff / 3600000);
-  const m   = Math.floor((diff % 3600000) / 60000);
-  const s   = Math.floor((diff % 60000)   / 1000);
-  const cls = diff < 60000 ? "tl-danger" : diff < 300000 ? "tl-warn" : "tl-ok";
+/* ─── TIME-LEFT HTML ─────────────────────────────────────── */
+function tlHtml(diff) {
+  if (diff <= 0) return `<span class="tl txx">Expired</span>`;
+  const h = Math.floor(diff / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  const s = Math.floor((diff % 60000)   / 1000);
   const str = h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${m}:${pad(s)}`;
+  const cls = diff < 60000 ? "tdg" : diff < 300000 ? "twn" : "tok";
   return `<span class="tl ${cls}">${str}</span>`;
 }
 function pad(n) { return String(n).padStart(2,"0"); }
 
-/* ── Soft-update pills in an existing team block ── */
-function updatePills(block, hits, now) {
-  const active = hits.filter(h => h.status==="active" && new Date(h.expiresAt||0) > now);
-  const sub    = hits.filter(h => h.status==="submitted");
-  const mRet   = hits.filter(h => h.status==="manual_returned");
-  const aRet   = hits.filter(h => h.status==="auto_returned");
-  const earned = sub.reduce((s,h) => s + (parseFloat(h.reward)||0), 0);
-  const pills  = block.querySelectorAll(".pill");
-  if (pills[0]) pills[0].textContent = `🟢 ${active.length} Active`;
-  if (pills[1]) pills[1].textContent = `✓ ${sub.length} Done`;
-  if (pills[2]) pills[2].textContent = `↩ M:${mRet.length}`;
-  if (pills[3]) pills[3].textContent = `⟲ A:${aRet.length}`;
-  if (pills[4]) pills[4].textContent = `$ ${earned.toFixed(2)}`;
+/* ─── REGISTER TIME CELLS ────────────────────────────────── */
+function registerTimeCells(root) {
+  root.querySelectorAll("td.tl-cell[data-exp]").forEach(td => {
+    const id = td.dataset.id;
+    const ex = parseInt(td.dataset.exp)||0;
+    if (id && ex) timeCells.set(id, { td, expiresMs:ex });
+  });
 }
 
-/* ── Soft-update table rows (only changed cells) ── */
-function updateTableRows(block, hits, now) {
-  const tbody = block.querySelector("tbody");
-  if (!tbody) return;
-
-  /* Build a map of existing rows by assignment ID */
-  const existingRows = new Map();
-  tbody.querySelectorAll("tr").forEach((tr, i) => {
-    /* Assignment ID is stored on the time-left cell */
-    const tlTd = tr.querySelector("td[data-assignment]");
-    if (tlTd) existingRows.set(tlTd.dataset.assignment, tr);
+/* ─── ATTACH COLLAPSE TOGGLES ────────────────────────────── */
+function attachToggles(root) {
+  root.querySelectorAll(".team-hdr").forEach(hdr => {
+    hdr.addEventListener("click", () =>
+      hdr.closest(".team").classList.toggle("collapsed"));
   });
+}
 
-  /* Check if row count changed */
-  if (existingRows.size !== hits.length) {
-    /* Re-render tbody only */
-    tbody.innerHTML = hits.map(h => buildRow(h, now)).join("");
-    /* Re-register time cells */
-    tbody.querySelectorAll("td[data-expires]").forEach(td => {
-      const id = td.dataset.assignment;
-      const ex = parseInt(td.dataset.expires)||0;
-      if (id && ex) timeCells.set(id, { el:td, expiresAt:ex });
-    });
-    return;
-  }
+/* ─── SOFT UPDATE (no full re-render) ────────────────────── */
+function softUpdate(block, hits, now) {
+  /* Pills */
+  const act  = hits.filter(h => h.status==="active" && new Date(h.expiresAt||0)>now);
+  const sub  = hits.filter(h => h.status==="submitted");
+  const mR   = hits.filter(h => h.status==="manual_returned");
+  const aR   = hits.filter(h => h.status==="auto_returned");
+  const earn = sub.reduce((s,h)=>s+(parseFloat(h.reward)||0),0);
+  const ps   = block.querySelectorAll(".pill");
+  if(ps[0]) ps[0].textContent = "🟢 " + act.length;
+  if(ps[1]) ps[1].textContent = "✓ " + sub.length;
+  if(ps[2]) ps[2].textContent = "↩M:" + mR.length;
+  if(ps[3]) ps[3].textContent = "⟲A:" + aR.length;
+  if(ps[4]) ps[4].textContent = "$" + earn.toFixed(2);
 
-  /* Update only status badges (time cells are handled by ticker) */
+  /* Status badges */
+  const rows = block.querySelectorAll("tbody tr");
+  const LABEL = {
+    active:"Active",submitted:"Submitted",
+    manual_returned:"M Return",auto_returned:"A Return",timed_out:"Timed Out"
+  };
   hits.forEach((h, i) => {
-    const tr = tbody.rows[i];
-    if (!tr) return;
-    const badge = tr.querySelector(".badge");
-    const LABELS = {
-      active:"Active", submitted:"Submitted",
-      manual_returned:"M Return", auto_returned:"A Return", timed_out:"Timed Out"
-    };
-    if (badge) {
-      const newLabel = LABELS[h.status] || h.status;
-      const newClass = "badge b-" + (h.status||"active");
-      if (badge.textContent !== newLabel) badge.textContent = newLabel;
-      if (badge.className    !== newClass) badge.className  = newClass;
+    const tr = rows[i]; if(!tr) return;
+    const b  = tr.querySelector(".badge");
+    if (b) {
+      const nl = LABEL[h.status]||h.status;
+      const nc = "badge "+( h.status||"active");
+      if(b.textContent!==nl) b.textContent = nl;
+      if(b.className  !==nc) b.className   = nc;
     }
-    /* Update time-cell registration */
-    const tlTd = tr.querySelector("td[data-expires]");
-    if (tlTd) {
-      const id = tlTd.dataset.assignment;
-      const ex = parseInt(tlTd.dataset.expires)||0;
-      if (id && ex) timeCells.set(id, { el:tlTd, expiresAt:ex });
+    /* Re-register time cell in case expiresAt changed */
+    const td = tr.querySelector("td.tl-cell[data-exp]");
+    if (td) {
+      const id = td.dataset.id;
+      const ex = parseInt(td.dataset.exp)||0;
+      if(id && ex) timeCells.set(id, { td, expiresMs:ex });
     }
   });
 }
 
-/* ══════════════════════════════════════════════════════
-   UTILS
-══════════════════════════════════════════════════════ */
+/* ─── UTILS ─────────────────────────────────────────────── */
 function x(s) {
   return String(s||"")
     .replace(/&/g,"&amp;").replace(/</g,"&lt;")
@@ -824,4 +684,3 @@ function x(s) {
 </script>
 </body>
 </html>
-
