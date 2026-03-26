@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MTurk HIT Tracker — Live Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════
+   TOKENS
+═══════════════════════════════════════════════ */
+:root{
+  --bg:       #060a14;
+  --bg1:      #090e1c;
+  --bg2:      #0d1525;
+  --bg3:      #111d30;
+  --border:   rgba(255,255,255,.06);
+  --border2:  rgba(255,255,255,.1);
+  --text:     #cdd6f4;
+  --text2:    #7c8db5;
+  --text3:    #3a4a6b;
+  --green:    #00e5a0;
+  --green2:   rgba(0,229,160,.12);
+  --blue:     #4fc3f7;
+  --blue2:    rgba(79,195,247,.12);
+  --amber:    #fbbf24;
+  --amber2:   rgba(251,191,36,.12);
+  --red:      #ff4d6d;
+  --red2:     rgba(255,77,109,.12);
+  --purple:   #c084fc;
+  --purple2:  rgba(192,132,252,.12);
+  --cyan:     #67e8f9;
+  --cyan2:    rgba(103,232,249,.12);
+  --orange:   #fb923c;
+  --orange2:  rgba(251,146,60,.12);
+  --mono:     'JetBrains Mono', monospace;
+  --sans:     'Outfit', sans-serif;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);
+     min-height:100vh;font-size:13px;
+     background-image:
+       radial-gradient(ellipse 80% 50% at 50% -10%,rgba(0,229,160,.06),transparent),
+       radial-gradient(ellipse 40% 30% at 100% 50%,rgba(79,195,247,.04),transparent)}
+
+/* ═══ SCROLLBAR ═══ */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:3px}
+
+/* ═══ HEADER ═══ */
+header{
+  background:rgba(9,14,28,.95);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  padding:0 24px;
+  height:64px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  position:sticky;top:0;z-index:200;
+}
+
+.logo{
+  display:flex;align-items:center;gap:12px;flex-shrink:0;
+}
+.logo-icon{font-size:22px;line-height:1}
+.logo-text{
+  font-family:var(--mono);font-size:13px;font-weight:700;
+  color:var(--text);letter-spacing:-.3px;
+}
+.logo-text span{color:var(--green)}
+
+.live-chip{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(0,229,160,.1);
+  border:1px solid rgba(0,229,160,.25);
+  color:var(--green);font-family:var(--mono);
+  font-size:10px;font-weight:700;
+  padding:4px 12px;border-radius:20px;
+  letter-spacing:.5px;
+}
+.live-dot{
+  width:6px;height:6px;border-radius:50%;background:var(--green);
+  animation:livepulse 2s ease-in-out infinite;
+}
+@keyframes livepulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+
+#clockDisplay{
+  font-family:var(--mono);font-size:11px;color:var(--text3);
+  white-space:nowrap;
+}
+
+/* ═══ CONTROL BAR ═══ */
+.controls{
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+}
+
+.ctrl{
+  display:flex;align-items:center;gap:6px;
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:8px;padding:5px 12px;
+  transition:border-color .2s;
+}
+.ctrl:focus-within{border-color:var(--border2)}
+.ctrl label{
+  font-family:var(--mono);font-size:9px;font-weight:600;
+  color:var(--text3);text-transform:uppercase;letter-spacing:.8px;
+  white-space:nowrap;
+}
+.ctrl select{
+  background:transparent;border:none;
+  color:var(--text);font-family:var(--sans);font-size:12px;font-weight:500;
+  cursor:pointer;padding:0 4px;outline:none;
+  -webkit-appearance:none;appearance:none;
+  min-width:80px;
+}
+.ctrl select option{background:#111d30;color:var(--text)}
+
+#hourCtrl{display:none}
+
+/* ═══ STATS STRIP ═══ */
+.stats{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(130px,1fr));
+  gap:10px;padding:16px 24px;
+}
+
+.sc{
+  background:var(--bg1);border:1px solid var(--border);
+  border-radius:10px;padding:16px;position:relative;
+  overflow:hidden;transition:border-color .25s,transform .2s;
+}
+.sc:hover{transform:translateY(-2px);border-color:var(--border2)}
+.sc::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+  border-radius:0 0 10px 10px;
+}
+.sc.c-green::after{background:var(--green)}
+.sc.c-blue::after{background:var(--blue)}
+.sc.c-amber::after{background:var(--amber)}
+.sc.c-purple::after{background:var(--purple)}
+.sc.c-cyan::after{background:var(--cyan)}
+.sc.c-orange::after{background:var(--orange)}
+.sc.c-red::after{background:var(--red)}
+
+.sc-lbl{
+  font-family:var(--mono);font-size:9px;font-weight:600;
+  color:var(--text3);text-transform:uppercase;letter-spacing:.8px;
+  margin-bottom:8px;
+}
+.sc-val{
+  font-family:var(--mono);font-size:28px;font-weight:700;
+  line-height:1;color:var(--text);
+  transition:color .3s;
+}
+.sc.c-green .sc-val{color:var(--green)}
+.sc.c-amber .sc-val{color:var(--amber)}
+.sc.c-purple .sc-val{color:var(--purple)}
+.sc.c-orange .sc-val{color:var(--orange)}
+.sc.c-red .sc-val{color:var(--red)}
+.sc-sub{
+  font-size:10px;color:var(--text3);margin-top:4px;
+  font-family:var(--mono);
+}
+
+/* ═══ BODY ═══ */
+.body{padding:0 24px 40px}
+
+/* ═══ TEAM BLOCK ═══ */
+.team-block{
+  background:var(--bg1);border:1px solid var(--border);
+  border-radius:12px;margin-bottom:14px;overflow:hidden;
+  transition:border-color .2s;
+}
+.team-block:hover{border-color:var(--border2)}
+
+.team-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:11px 18px;background:var(--bg2);
+  border-bottom:1px solid var(--border);
+  cursor:pointer;user-select:none;gap:12px;flex-wrap:wrap;
+  transition:background .15s;
+}
+.team-hdr:hover{background:var(--bg3)}
+
+.team-name{
+  font-family:var(--mono);font-size:13px;font-weight:700;
+  color:var(--cyan);display:flex;align-items:center;gap:8px;
+  min-width:0;
+}
+.team-toggle{
+  font-size:9px;color:var(--text3);
+  transition:transform .2s;flex-shrink:0;
+}
+.team-block.collapsed .team-toggle{transform:rotate(-90deg)}
+.team-block.collapsed .team-table-wrap{display:none}
+
+.team-pills{
+  display:flex;gap:6px;flex-wrap:wrap;align-items:center;
+}
+.pill{
+  font-family:var(--mono);font-size:10px;font-weight:700;
+  padding:2px 10px;border-radius:20px;white-space:nowrap;
+  letter-spacing:.2px;
+}
+.p-act  {background:var(--green2);color:var(--green); border:1px solid rgba(0,229,160,.2)}
+.p-sub  {background:var(--blue2); color:var(--blue);  border:1px solid rgba(79,195,247,.2)}
+.p-mret {background:var(--orange2);color:var(--orange);border:1px solid rgba(251,146,60,.2)}
+.p-aret {background:var(--red2);  color:var(--red);   border:1px solid rgba(255,77,109,.2)}
+.p-earn {background:var(--amber2);color:var(--amber); border:1px solid rgba(251,191,36,.2)}
+
+/* ═══ TABLE ═══ */
+.team-table-wrap{overflow-x:auto}
+
+table{width:100%;border-collapse:collapse}
+thead th{
+  background:rgba(5,7,15,.8);padding:8px 14px;
+  font-family:var(--mono);font-size:9px;color:var(--text3);
+  text-transform:uppercase;letter-spacing:.6px;font-weight:600;
+  text-align:left;border-bottom:1px solid var(--border);
+  white-space:nowrap;
+}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:rgba(255,255,255,.02)}
+tbody td{padding:9px 14px;vertical-align:middle}
+
+/* Cell types */
+.c-wid {font-family:var(--mono);font-size:11px;color:var(--text3)}
+.c-name{font-weight:600;color:var(--text);font-size:13px}
+.c-req {color:var(--blue);font-weight:600;font-size:12px;white-space:nowrap}
+.c-title{
+  max-width:220px;overflow:hidden;text-overflow:ellipsis;
+  white-space:nowrap;font-size:12px;color:var(--text2)
+}
+.c-rew {font-family:var(--mono);color:var(--amber);font-weight:700;font-size:13px}
+.c-time{font-size:11px;color:var(--text2);white-space:nowrap}
+
+/* Status badges */
+.badge{
+  font-family:var(--mono);font-size:10px;font-weight:700;
+  padding:3px 10px;border-radius:20px;
+  text-transform:uppercase;letter-spacing:.3px;white-space:nowrap;
+  display:inline-block;
+}
+.b-active         {background:var(--green2);color:var(--green); border:1px solid rgba(0,229,160,.3)}
+.b-submitted      {background:var(--blue2); color:var(--blue);  border:1px solid rgba(79,195,247,.3)}
+.b-manual_returned{background:var(--orange2);color:var(--orange);border:1px solid rgba(251,146,60,.3)}
+.b-auto_returned  {background:var(--red2);  color:var(--red);   border:1px solid rgba(255,77,109,.3)}
+.b-timed_out      {background:rgba(60,70,90,.3);color:var(--text3);border:1px solid var(--border)}
+
+/* Time-left cell  — updated ONLY by the ticker, not on re-render */
+.tl{font-family:var(--mono);font-size:12px;font-weight:700;white-space:nowrap}
+.tl-ok    {color:var(--green)}
+.tl-warn  {color:var(--amber)}
+.tl-danger{color:var(--red);animation:dangerblink .7s infinite}
+.tl-exp   {color:var(--text3)}
+@keyframes dangerblink{0%,100%{opacity:1}50%{opacity:.25}}
+
+/* ═══ EMPTY / LOADING ═══ */
+.empty{
+  text-align:center;padding:64px 24px;
+  font-family:var(--mono);color:var(--text3);font-size:13px;
+}
+.empty-icon{font-size:40px;margin-bottom:14px;opacity:.6}
+.empty-msg{color:var(--text2);margin-top:6px;font-size:12px}
+
+/* ═══ STATUS BAR ═══ */
+.statusbar{
+  display:flex;align-items:center;gap:8px;
+  padding:0 24px 0 0;
+}
+#statusMsg{font-family:var(--mono);font-size:10px;color:var(--text3)}
+
+/* ═══ RESPONSIVE ═══ */
+@media(max-width:640px){
+  header{height:auto;padding:12px 16px;flex-wrap:wrap}
+  .stats,.body{padding-left:16px;padding-right:16px}
+  .stats{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ HEADER ══════════════════════════════════════════ -->
+<header>
+  <div class="logo">
+    <span class="logo-icon">📡</span>
+    <div>
+      <div class="logo-text">MTurk HIT Tracker <span>// LIVE</span></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:3px">
+        <span class="live-chip"><span class="live-dot"></span>REAL-TIME</span>
+        <span id="statusMsg">Connecting…</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+    <span id="clockDisplay"></span>
+
+    <div class="controls">
+
+      <!-- Frequency / time range -->
+      <div class="ctrl">
+        <label>View</label>
+        <select id="freqSel" onchange="onFreqChange()">
+          <option value="hourly">Hourly</option>
+          <option value="daily">Daily</option>
+          <option value="monthly">Monthly</option>
+          <option value="yearly">Yearly</option>
+        </select>
+      </div>
+
+      <!-- Hour sub-selector (1-12), shown only when Hourly -->
+      <div class="ctrl" id="hourCtrl">
+        <label>Hours</label>
+        <select id="hourSel" onchange="applyFilters()">
+          <option value="1">1 hr</option>
+          <option value="2">2 hr</option>
+          <option value="3">3 hr</option>
+          <option value="4">4 hr</option>
+          <option value="6">6 hr</option>
+          <option value="8">8 hr</option>
+          <option value="12">12 hr</option>
+        </select>
+      </div>
+
+      <!-- Team -->
+      <div class="ctrl">
+        <label>Team</label>
+        <select id="teamSel" onchange="applyFilters()">
+          <option value="">All Teams</option>
+        </select>
+      </div>
+
+      <!-- Worker -->
+      <div class="ctrl">
+        <label>Worker</label>
+        <select id="workerSel" onchange="applyFilters()">
+          <option value="">All Workers</option>
+        </select>
+      </div>
+
+      <!-- Status -->
+      <div class="ctrl">
+        <label>Status</label>
+        <select id="statusSel" onchange="applyFilters()">
+          <option value="">All</option>
+          <option value="active">Active</option>
+          <option value="submitted">Submitted</option>
+          <option value="manual_returned">M Return</option>
+          <option value="auto_returned">A Return</option>
+          <option value="timed_out">Timed Out</option>
+        </select>
+      </div>
+
+    </div>
+  </div>
+</header>
+
+<!-- ══ STATS ═══════════════════════════════════════════ -->
+<div class="stats">
+  <div class="sc c-green">
+    <div class="sc-lbl">Active Now</div>
+    <div class="sc-val" id="sActive">—</div>
+    <div class="sc-sub" id="sActiveSub">workers in queue</div>
+  </div>
+  <div class="sc c-blue">
+    <div class="sc-lbl">Total HITs</div>
+    <div class="sc-val" id="sTotal">—</div>
+  </div>
+  <div class="sc c-amber">
+    <div class="sc-lbl">Earned ($)</div>
+    <div class="sc-val" id="sEarned">—</div>
+    <div class="sc-sub">submitted only</div>
+  </div>
+  <div class="sc c-purple">
+    <div class="sc-lbl">Workers</div>
+    <div class="sc-val" id="sWorkers">—</div>
+  </div>
+  <div class="sc c-cyan" style="--cyan2:rgba(103,232,249,.12)">
+    <div class="sc-lbl">Teams</div>
+    <div class="sc-val" id="sTeams" style="color:var(--cyan)">—</div>
+  </div>
+  <div class="sc c-blue">
+    <div class="sc-lbl">Submitted</div>
+    <div class="sc-val" id="sSub">—</div>
+  </div>
+  <div class="sc c-orange">
+    <div class="sc-lbl">M Returns</div>
+    <div class="sc-val" id="sMRet">—</div>
+    <div class="sc-sub">manual</div>
+  </div>
+  <div class="sc c-red">
+    <div class="sc-lbl">A Returns</div>
+    <div class="sc-val" id="sARet">—</div>
+    <div class="sc-sub">auto</div>
+  </div>
+</div>
+
+<!-- ══ TEAM BLOCKS ══════════════════════════════════════ -->
+<div class="body" id="body">
+  <div class="empty">
+    <div class="empty-icon">⏳</div>
+    Loading HITs from Firebase…
+  </div>
+</div>
+
+<!-- ══ FIREBASE + LOGIC ════════════════════════════════ -->
+<script type="module">
+import { initializeApp }    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, query, orderBy, onSnapshot, doc, setDoc }
+                            from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+/* ── Firebase init ── */
+const db = getFirestore(initializeApp({
+  apiKey:            "AIzaSyBKiMs4NnvLrjpPvKQUS0GzHFMim1wIGng",
+  authDomain:        "manitasks-2471b.firebaseapp.com",
+  projectId:         "manitasks-2471b",
+  storageBucket:     "manitasks-2471b.firebasestorage.app",
+  messagingSenderId: "889596390115",
+  appId:             "1:889596390115:web:024527c2a5ed98fbc473d6"
+}));
+
+/* ══════════════════════════════════════════════════════
+   STATE
+══════════════════════════════════════════════════════ */
+let allHits       = [];          // raw Firebase docs
+let renderPending = false;
+
+/* Map of assignmentId → { el: HTMLElement, expiresAt: ms }
+   Used by the second-ticker to update only time cells   */
+const timeCells = new Map();
+
+/* ══════════════════════════════════════════════════════
+   CLOCK
+══════════════════════════════════════════════════════ */
+function updateClock() {
+  document.getElementById("clockDisplay").textContent =
+    new Date().toLocaleTimeString([], { hour12: false });
+}
+updateClock();
+setInterval(updateClock, 1000);
+
+/* ══════════════════════════════════════════════════════
+   SECOND TICKER — updates ONLY time-left cells
+   No full re-render. No lag.
+══════════════════════════════════════════════════════ */
+setInterval(() => {
+  const now = Date.now();
+  timeCells.forEach((data, id) => {
+    // Remove stale references (element no longer in DOM)
+    if (!document.contains(data.el)) { timeCells.delete(id); return; }
+    const diff = data.expiresAt - now;
+    data.el.innerHTML = buildTLHtml(diff);
+  });
+}, 1000);
+
+/* ══════════════════════════════════════════════════════
+   FIREBASE REAL-TIME LISTENER
+══════════════════════════════════════════════════════ */
+onSnapshot(
+  query(collection(db, "hits"), orderBy("acceptedAt", "desc")),
+  snap => {
+    allHits = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    autoExpire();
+    scheduleRender();
+    document.getElementById("statusMsg").textContent =
+      "Last sync: " + new Date().toLocaleTimeString();
+    rebuildDropdowns();
+  },
+  err => {
+    document.getElementById("statusMsg").textContent = "⚠️ " + err.message;
+  }
+);
+
+/* Auto-expire HITs whose timer ran out */
+function autoExpire() {
+  const now = new Date();
+  allHits.forEach(h => {
+    if (h.status === "active" && h.expiresAt && new Date(h.expiresAt) < now) {
+      h.status = "timed_out";
+      setDoc(doc(db, "hits", h.id), { status:"timed_out", timedOutAt:now.toISOString() }, { merge:true })
+        .catch(() => {});
+    }
+  });
+}
+
+/* Batched render via rAF to avoid thrashing */
+function scheduleRender() {
+  if (renderPending) return;
+  renderPending = true;
+  requestAnimationFrame(() => { renderPending = false; applyFilters(); });
+}
+
+/* ══════════════════════════════════════════════════════
+   FREQUENCY CHANGE  — show/hide hour sub-select
+══════════════════════════════════════════════════════ */
+window.onFreqChange = function () {
+  const freq = document.getElementById("freqSel").value;
+  document.getElementById("hourCtrl").style.display =
+    freq === "hourly" ? "flex" : "none";
+  applyFilters();
+};
+
+/* ══════════════════════════════════════════════════════
+   FILTERS → RENDER
+══════════════════════════════════════════════════════ */
+window.applyFilters = function () {
+  const freq    = document.getElementById("freqSel").value;
+  const hours   = parseInt(document.getElementById("hourSel").value || "1");
+  const teamF   = document.getElementById("teamSel").value;
+  const workerF = document.getElementById("workerSel").value;
+  const statusF = document.getElementById("statusSel").value;
+  const now     = new Date();
+
+  /* Compute cutoff based on frequency */
+  let cutMs = 0;
+  if (freq === "hourly")  cutMs = hours * 3600_000;
+  if (freq === "daily")   cutMs = 86400_000;
+  if (freq === "monthly") cutMs = 30 * 86400_000;
+  if (freq === "yearly")  cutMs = 365 * 86400_000;
+
+  let hits = allHits;
+
+  if (cutMs > 0) {
+    const cut = new Date(now - cutMs);
+    hits = hits.filter(h => h.acceptedAt && new Date(h.acceptedAt) >= cut);
+  }
+  if (teamF)   hits = hits.filter(h => (h.teamname  || "No Team") === teamF);
+  if (workerF) hits = hits.filter(h => (h.username  || h.workerId) === workerF);
+  if (statusF) hits = hits.filter(h => h.status === statusF);
+
+  renderStats(hits, now);
+  renderTeams(hits, now);
+};
+
+/* ══════════════════════════════════════════════════════
+   DROPDOWNS
+══════════════════════════════════════════════════════ */
+function rebuildDropdowns() {
+  const teams   = [...new Set(allHits.map(h => h.teamname  || "No Team"))].sort();
+  const workers = [...new Set(allHits.map(h => h.username  || h.workerId || "?"))].sort();
+  fillSelect("teamSel",   teams,   "All Teams");
+  fillSelect("workerSel", workers, "All Workers");
+}
+
+function fillSelect(id, items, placeholder) {
+  const sel = document.getElementById(id);
+  const cur = sel.value;
+  sel.innerHTML = `<option value="">${x(placeholder)}</option>` +
+    items.map(v => `<option value="${x(v)}"${v===cur?" selected":""}>${x(v)}</option>`).join("");
+}
+
+/* ══════════════════════════════════════════════════════
+   STATS
+══════════════════════════════════════════════════════ */
+function renderStats(hits, now) {
+  const active  = hits.filter(h => h.status==="active" && new Date(h.expiresAt||0) > now);
+  const sub     = hits.filter(h => h.status==="submitted");
+  const mRet    = hits.filter(h => h.status==="manual_returned");
+  const aRet    = hits.filter(h => h.status==="auto_returned");
+  const earned  = sub.reduce((s,h) => s + (parseFloat(h.reward)||0), 0);
+  const workers = new Set(hits.map(h => h.workerId)).size;
+  const teams   = new Set(hits.map(h => h.teamname||"No Team")).size;
+  const actW    = new Set(active.map(h => h.workerId)).size;
+
+  setText("sActive",    actW);
+  setText("sActiveSub", active.length + " active HIT" + (active.length!==1?"s":""));
+  setText("sTotal",     hits.length);
+  setText("sEarned",    "$" + earned.toFixed(2));
+  setText("sWorkers",   workers);
+  setText("sTeams",     teams);
+  setText("sSub",       sub.length);
+  setText("sMRet",      mRet.length);
+  setText("sARet",      aRet.length);
+}
+
+function setText(id, v) {
+  const el = document.getElementById(id);
+  if (el && el.textContent !== String(v)) el.textContent = v;
+}
+
+/* ══════════════════════════════════════════════════════
+   TEAM BLOCKS
+══════════════════════════════════════════════════════ */
+function renderTeams(hits, now) {
+  const body = document.getElementById("body");
+
+  if (!hits.length) {
+    timeCells.clear();
+    body.innerHTML = `<div class="empty">
+      <div class="empty-icon">🔍</div>
+      No HITs found for the selected filters.
+      <div class="empty-msg">Try changing the time range or clearing filters.</div>
+    </div>`;
+    return;
+  }
+
+  /* Group by team */
+  const byTeam = new Map();
+  hits.forEach(h => {
+    const t = h.teamname || "No Team";
+    if (!byTeam.has(t)) byTeam.set(t, []);
+    byTeam.get(t).push(h);
+  });
+
+  /* Preserve collapsed state */
+  const collapsed = new Set(
+    [...body.querySelectorAll(".team-block.collapsed")]
+      .map(el => el.dataset.team)
+  );
+
+  /* Smart update: if same teams, update rows in-place.
+     Otherwise full replace (avoids unnecessary reflows). */
+  const currentTeams = [...body.querySelectorAll(".team-block")].map(el => el.dataset.team);
+  const newTeams     = [...byTeam.keys()].sort((a,b) => a.localeCompare(b));
+  const needFullRender = currentTeams.join(",") !== newTeams.join(",");
+
+  if (needFullRender) {
+    /* Build fragment */
+    const frag = document.createDocumentFragment();
+    newTeams.forEach(team => {
+      const el = buildTeamBlock(team, byTeam.get(team), now, collapsed.has(team));
+      frag.appendChild(el);
+    });
+
+    /* Clear stale time cell refs */
+    timeCells.clear();
+    body.innerHTML = "";
+    body.appendChild(frag);
+
+    /* Register time cells */
+    body.querySelectorAll("td[data-expires]").forEach(td => {
+      const id = td.dataset.assignment;
+      const ex = parseInt(td.dataset.expires) || 0;
+      if (id && ex) timeCells.set(id, { el: td, expiresAt: ex });
+    });
+
+    /* Collapse toggle */
+    body.querySelectorAll(".team-hdr").forEach(hdr => {
+      hdr.addEventListener("click", () =>
+        hdr.closest(".team-block").classList.toggle("collapsed"));
+    });
+
+  } else {
+    /* Soft update: only refresh time-left cells that changed */
+    /* (Stats + pill counts are updated separately above) */
+    newTeams.forEach(team => {
+      const block = body.querySelector(`.team-block[data-team="${CSS.escape(team)}"]`);
+      if (!block) return;
+      const teamHits = byTeam.get(team);
+      updatePills(block, teamHits, now);
+      updateTableRows(block, teamHits, now);
+    });
+  }
+}
+
+/* ── Build a full team block element ── */
+function buildTeamBlock(team, hits, now, isCollapsed) {
+  const el = document.createElement("div");
+  el.className  = "team-block" + (isCollapsed ? " collapsed" : "");
+  el.dataset.team = team;
+
+  const active  = hits.filter(h => h.status==="active" && new Date(h.expiresAt||0) > now);
+  const sub     = hits.filter(h => h.status==="submitted");
+  const mRet    = hits.filter(h => h.status==="manual_returned");
+  const aRet    = hits.filter(h => h.status==="auto_returned");
+  const earned  = sub.reduce((s,h) => s + (parseFloat(h.reward)||0), 0);
+
+  el.innerHTML = `
+  <div class="team-hdr">
+    <div class="team-name">
+      <span class="team-toggle">▾</span>
+      🏷 ${x(team)}
+      <span style="color:var(--text3);font-size:10px;font-weight:400">(${hits.length})</span>
+    </div>
+    <div class="team-pills">
+      <span class="pill p-act">🟢 ${active.length} Active</span>
+      <span class="pill p-sub">✓ ${sub.length} Done</span>
+      <span class="pill p-mret">↩ M:${mRet.length}</span>
+      <span class="pill p-aret">⟲ A:${aRet.length}</span>
+      <span class="pill p-earn">$ ${earned.toFixed(2)}</span>
+    </div>
+  </div>
+  <div class="team-table-wrap">
+    <table>
+      <thead><tr>
+        <th>Worker ID</th><th>Username</th><th>Requester</th>
+        <th>Title</th><th>Reward</th><th>Accepted</th>
+        <th>Time Left</th><th>Status</th>
+      </tr></thead>
+      <tbody>${hits.map(h => buildRow(h, now)).join("")}</tbody>
+    </table>
+  </div>`;
+
+  return el;
+}
+
+/* ── Build one table row ── */
+function buildRow(h, now) {
+  const acc    = h.acceptedAt ? new Date(h.acceptedAt) : null;
+  const accStr = acc
+    ? acc.toLocaleDateString() + " " +
+      acc.toLocaleTimeString([], { hour:"2-digit", minute:"2-digit", second:"2-digit", hour12:false })
+    : "—";
+
+  const exMs   = h.expiresAt ? new Date(h.expiresAt).getTime() : 0;
+  const diff   = exMs - now.getTime();
+  const isAct  = h.status === "active" && diff > 0;
+
+  const tlAttr = isAct
+    ? `data-expires="${exMs}" data-assignment="${x(h.id)}"`
+    : "";
+
+  const LABELS = {
+    active:"Active", submitted:"Submitted",
+    manual_returned:"M Return", auto_returned:"A Return", timed_out:"Timed Out"
+  };
+
+  return `<tr>
+    <td class="c-wid">${x(h.workerId||"—")}</td>
+    <td class="c-name">${x(h.username||"Unknown")}</td>
+    <td class="c-req">${x(h.requester||"—")}</td>
+    <td><div class="c-title" title="${x(h.title||"")}">${x(h.title||"—")}</div></td>
+    <td class="c-rew">$${(parseFloat(h.reward)||0).toFixed(2)}</td>
+    <td class="c-time">${accStr}</td>
+    <td ${tlAttr}>${isAct ? buildTLHtml(diff) : `<span class="tl tl-exp">—</span>`}</td>
+    <td><span class="badge b-${h.status||"active"}">${LABELS[h.status]||h.status||"Active"}</span></td>
+  </tr>`;
+}
+
+/* ── Build time-left HTML ── */
+function buildTLHtml(diff) {
+  if (diff <= 0) return `<span class="tl tl-exp">Expired</span>`;
+  const h   = Math.floor(diff / 3600000);
+  const m   = Math.floor((diff % 3600000) / 60000);
+  const s   = Math.floor((diff % 60000)   / 1000);
+  const cls = diff < 60000 ? "tl-danger" : diff < 300000 ? "tl-warn" : "tl-ok";
+  const str = h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${m}:${pad(s)}`;
+  return `<span class="tl ${cls}">${str}</span>`;
+}
+function pad(n) { return String(n).padStart(2,"0"); }
+
+/* ── Soft-update pills in an existing team block ── */
+function updatePills(block, hits, now) {
+  const active = hits.filter(h => h.status==="active" && new Date(h.expiresAt||0) > now);
+  const sub    = hits.filter(h => h.status==="submitted");
+  const mRet   = hits.filter(h => h.status==="manual_returned");
+  const aRet   = hits.filter(h => h.status==="auto_returned");
+  const earned = sub.reduce((s,h) => s + (parseFloat(h.reward)||0), 0);
+  const pills  = block.querySelectorAll(".pill");
+  if (pills[0]) pills[0].textContent = `🟢 ${active.length} Active`;
+  if (pills[1]) pills[1].textContent = `✓ ${sub.length} Done`;
+  if (pills[2]) pills[2].textContent = `↩ M:${mRet.length}`;
+  if (pills[3]) pills[3].textContent = `⟲ A:${aRet.length}`;
+  if (pills[4]) pills[4].textContent = `$ ${earned.toFixed(2)}`;
+}
+
+/* ── Soft-update table rows (only changed cells) ── */
+function updateTableRows(block, hits, now) {
+  const tbody = block.querySelector("tbody");
+  if (!tbody) return;
+
+  /* Build a map of existing rows by assignment ID */
+  const existingRows = new Map();
+  tbody.querySelectorAll("tr").forEach((tr, i) => {
+    /* Assignment ID is stored on the time-left cell */
+    const tlTd = tr.querySelector("td[data-assignment]");
+    if (tlTd) existingRows.set(tlTd.dataset.assignment, tr);
+  });
+
+  /* Check if row count changed */
+  if (existingRows.size !== hits.length) {
+    /* Re-render tbody only */
+    tbody.innerHTML = hits.map(h => buildRow(h, now)).join("");
+    /* Re-register time cells */
+    tbody.querySelectorAll("td[data-expires]").forEach(td => {
+      const id = td.dataset.assignment;
+      const ex = parseInt(td.dataset.expires)||0;
+      if (id && ex) timeCells.set(id, { el:td, expiresAt:ex });
+    });
+    return;
+  }
+
+  /* Update only status badges (time cells are handled by ticker) */
+  hits.forEach((h, i) => {
+    const tr = tbody.rows[i];
+    if (!tr) return;
+    const badge = tr.querySelector(".badge");
+    const LABELS = {
+      active:"Active", submitted:"Submitted",
+      manual_returned:"M Return", auto_returned:"A Return", timed_out:"Timed Out"
+    };
+    if (badge) {
+      const newLabel = LABELS[h.status] || h.status;
+      const newClass = "badge b-" + (h.status||"active");
+      if (badge.textContent !== newLabel) badge.textContent = newLabel;
+      if (badge.className    !== newClass) badge.className  = newClass;
+    }
+    /* Update time-cell registration */
+    const tlTd = tr.querySelector("td[data-expires]");
+    if (tlTd) {
+      const id = tlTd.dataset.assignment;
+      const ex = parseInt(tlTd.dataset.expires)||0;
+      if (id && ex) timeCells.set(id, { el:tlTd, expiresAt:ex });
+    }
+  });
+}
+
+/* ══════════════════════════════════════════════════════
+   UTILS
+══════════════════════════════════════════════════════ */
+function x(s) {
+  return String(s||"")
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+</script>
+</body>
+</html>
