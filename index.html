@@ -328,28 +328,27 @@ const tmSel = document.getElementById("tmSel");
 const wkSel = document.getElementById("wkSel");
 const stSel = document.getElementById("stSel");
 
-/* ── MEMORY ENGINE: Load previous selections ── */
-function loadMemory() {
-    if (localStorage.getItem("mrp_dash_fq")) fqSel.value = localStorage.getItem("mrp_dash_fq");
-    if (localStorage.getItem("mrp_dash_hr")) hrSel.value = localStorage.getItem("mrp_dash_hr");
-    if (localStorage.getItem("mrp_dash_tm")) tmSel.value = localStorage.getItem("mrp_dash_tm");
-    if (localStorage.getItem("mrp_dash_wk")) wkSel.value = localStorage.getItem("mrp_dash_wk");
-    if (localStorage.getItem("mrp_dash_st")) stSel.value = localStorage.getItem("mrp_dash_st");
+/* ── MEMORY ENGINE: Load static selections immediately ── */
+function loadStaticMemory() {
+    const savedFq = localStorage.getItem("mrp_dash_fq");
+    const savedHr = localStorage.getItem("mrp_dash_hr");
+    const savedSt = localStorage.getItem("mrp_dash_st");
+
+    if (savedFq !== null) fqSel.value = savedFq;
+    if (savedHr !== null) hrSel.value = savedHr;
+    if (savedSt !== null) stSel.value = savedSt;
     
-    // Toggle HR display based on saved FQ
     document.getElementById("hrC").style.display = fqSel.value === "hourly" ? "flex" : "none";
 }
-loadMemory();
+loadStaticMemory();
 
 /* ── LIVE FILTERING ENGINE: Instant Update on Click ── */
 function attachLiveFilters() {
     [fqSel, hrSel, tmSel, wkSel, stSel].forEach(select => {
         select.addEventListener("change", (e) => {
-            // Save choice to memory immediately
             const memKey = "mrp_dash_" + e.target.id.replace("Sel", "");
             localStorage.setItem(memKey, e.target.value);
             
-            // Handle Hourly dropdown visibility
             if (e.target.id === "fqSel") {
                  document.getElementById("hrC").style.display = e.target.value === "hourly" ? "flex" : "none";
             }
@@ -385,7 +384,7 @@ onSnapshot(
 
     allHits = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     autoExpire();
-    rebuildSelects();
+    rebuildSelects(); // This dynamically rebuilds Team and Worker dropdowns and applies memory
 
     if (!dirty) {
       dirty = true;
@@ -423,19 +422,31 @@ function showErr(msg) {
   else      { el.style.display = "none"; }
 }
 
-/* ── Dropdowns ── */
+/* ── DYNAMIC DROPDOWNS (With Smart Memory Injection) ── */
 function rebuildSelects() {
   const teams = [...new Set(allHits.map(h => h.teamname || "No Team"))].sort();
   const wrks  = [...new Set(allHits.map(h => h.username || h.workerId || "?"))].sort();
-  fill("tmSel", teams, "All Teams");
-  fill("wkSel", wrks,  "All Workers");
+  fillDynamic("tmSel", teams, "All Teams");
+  fillDynamic("wkSel", wrks,  "All Workers");
 }
 
-function fill(id, items, ph) {
+function fillDynamic(id, items, ph) {
   const s = document.getElementById(id);
-  const c = s.value;
+  const memKey = "mrp_dash_" + id.replace("Sel", "");
+  
+  // Pull from memory. If nothing was ever saved, use an empty string (Default)
+  let savedVal = localStorage.getItem(memKey);
+  if (savedVal === null) savedVal = "";
+
   s.innerHTML = `<option value="">${x(ph)}</option>` +
-    items.map(v => `<option value="${x(v)}"${v === c ? " selected" : ""}>${x(v)}</option>`).join("");
+    items.map(v => `<option value="${x(v)}"${v === savedVal ? " selected" : ""}>${x(v)}</option>`).join("");
+    
+  // Force the browser to apply the saved selection to the live dropdown element
+  if (savedVal && items.includes(savedVal)) {
+      s.value = savedVal;
+  } else {
+      s.value = "";
+  }
 }
 
 /* ── Filter + render ── */
