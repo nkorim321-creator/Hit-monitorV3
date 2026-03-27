@@ -161,6 +161,7 @@ tbody td{padding:8px 13px;vertical-align:middle}
 .manual_returned{background:var(--or2);color:var(--orange);border:1px solid rgba(251,146,60,.3)}
 .auto_returned  {background:var(--rd2);color:var(--red);   border:1px solid rgba(255,64,96,.3)}
 .timed_out      {background:rgba(40,50,70,.4);color:var(--tx3);border:1px solid var(--bd)}
+.expired        {background:rgba(40,50,70,.4);color:var(--tx3);border:1px solid var(--bd)}
 
 /* ── TIME LEFT ── */
 .tl{font-family:var(--mono);font-size:12px;font-weight:700;white-space:nowrap}
@@ -193,7 +194,6 @@ tbody td{padding:8px 13px;vertical-align:middle}
 </head>
 <body>
 
-<!-- ══ HEADER ══════════════════════════════════════════════ -->
 <div class="hdr">
   <div class="logo">📡 MTurk HIT Tracker <em>// LIVE</em></div>
   <span class="chip"><span class="dot"></span>REAL-TIME</span>
@@ -201,14 +201,12 @@ tbody td{padding:8px 13px;vertical-align:middle}
   <span id="clk"></span>
 </div>
 
-<!-- ══ ERROR BANNER ════════════════════════════════════════ -->
 <div id="errBanner"></div>
 
-<!-- ══ CONTROLS ════════════════════════════════════════════ -->
 <div class="cbar">
   <div class="ctrl">
     <span class="cl">VIEW</span>
-    <select id="fqSel" onchange="onFreq()">
+    <select id="fqSel">
       <option value="hourly">Hourly</option>
       <option value="daily">Daily</option>
       <option value="monthly">Monthly</option>
@@ -217,7 +215,7 @@ tbody td{padding:8px 13px;vertical-align:middle}
   </div>
   <div class="ctrl" id="hrC">
     <span class="cl">HRS</span>
-    <select id="hrSel" onchange="applyFilters()">
+    <select id="hrSel">
       <option value="1">1 hr</option><option value="2">2 hr</option>
       <option value="3">3 hr</option><option value="4">4 hr</option>
       <option value="6">6 hr</option><option value="8">8 hr</option>
@@ -226,25 +224,25 @@ tbody td{padding:8px 13px;vertical-align:middle}
   </div>
   <div class="ctrl">
     <span class="cl">TEAM</span>
-    <select id="tmSel" onchange="applyFilters()"><option value="">All Teams</option></select>
+    <select id="tmSel"><option value="">All Teams</option></select>
   </div>
   <div class="ctrl">
     <span class="cl">WORKER</span>
-    <select id="wkSel" onchange="applyFilters()"><option value="">All Workers</option></select>
+    <select id="wkSel"><option value="">All Workers</option></select>
   </div>
   <div class="ctrl">
     <span class="cl">STATUS</span>
-    <select id="stSel" onchange="applyFilters()">
+    <select id="stSel">
       <option value="">All</option>
       <option value="active">Active</option>
       <option value="manual_returned">M Return</option>
       <option value="auto_returned">A Return</option>
+      <option value="expired">Expired</option>
       <option value="timed_out">Timed Out</option>
     </select>
   </div>
 </div>
 
-<!-- ══ STATS ════════════════════════════════════════════════ -->
 <div class="stats">
   <div class="sc g">
     <div class="sl">Active Now</div>
@@ -280,11 +278,10 @@ tbody td{padding:8px 13px;vertical-align:middle}
   <div class="sc r">
     <div class="sl">A Returns</div>
     <div class="sv" id="sAR">—</div>
-    <div class="ss">auto</div>
+    <div class="ss">auto / expired</div>
   </div>
 </div>
 
-<!-- ══ TEAM BLOCKS ══════════════════════════════════════════ -->
 <div class="body" id="body">
   <div class="empty">
     <div class="empty-i">⏳</div>
@@ -293,13 +290,9 @@ tbody td{padding:8px 13px;vertical-align:middle}
   </div>
 </div>
 
-<!-- ══ FIREBASE + DASHBOARD LOGIC ══════════════════════════ -->
 <script type="module">
 /* ─────────────────────────────────────────────────────────
    FIREBASE CONFIG
-   Project: hit-monitorv3
-   This MUST match the Firebase project the userscript
-   writes to. Both use the SAME project.
 ───────────────────────────────────────────────────────── */
 import { initializeApp }   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
@@ -328,6 +321,46 @@ let allHits = [];
 let dirty   = false;
 const TC    = new Map();   /* assignmentId → { td, expiresMs } */
 
+/* ── DOM Elements for Event Listeners ── */
+const fqSel = document.getElementById("fqSel");
+const hrSel = document.getElementById("hrSel");
+const tmSel = document.getElementById("tmSel");
+const wkSel = document.getElementById("wkSel");
+const stSel = document.getElementById("stSel");
+
+/* ── MEMORY ENGINE: Load previous selections ── */
+function loadMemory() {
+    if (localStorage.getItem("mrp_dash_fq")) fqSel.value = localStorage.getItem("mrp_dash_fq");
+    if (localStorage.getItem("mrp_dash_hr")) hrSel.value = localStorage.getItem("mrp_dash_hr");
+    if (localStorage.getItem("mrp_dash_tm")) tmSel.value = localStorage.getItem("mrp_dash_tm");
+    if (localStorage.getItem("mrp_dash_wk")) wkSel.value = localStorage.getItem("mrp_dash_wk");
+    if (localStorage.getItem("mrp_dash_st")) stSel.value = localStorage.getItem("mrp_dash_st");
+    
+    // Toggle HR display based on saved FQ
+    document.getElementById("hrC").style.display = fqSel.value === "hourly" ? "flex" : "none";
+}
+loadMemory();
+
+/* ── LIVE FILTERING ENGINE: Instant Update on Click ── */
+function attachLiveFilters() {
+    [fqSel, hrSel, tmSel, wkSel, stSel].forEach(select => {
+        select.addEventListener("change", (e) => {
+            // Save choice to memory immediately
+            const memKey = "mrp_dash_" + e.target.id.replace("Sel", "");
+            localStorage.setItem(memKey, e.target.value);
+            
+            // Handle Hourly dropdown visibility
+            if (e.target.id === "fqSel") {
+                 document.getElementById("hrC").style.display = e.target.value === "hourly" ? "flex" : "none";
+            }
+            
+            // Instantly apply filters without fetching or refreshing
+            applyFilters();
+        });
+    });
+}
+attachLiveFilters();
+
 /* ── Clock (updates every second) ── */
 (function tick(){
   document.getElementById("clk").textContent =
@@ -348,14 +381,12 @@ setInterval(() => {
 onSnapshot(
   query(collection(db, "hits"), orderBy("acceptedAt", "desc")),
   snap => {
-    /* Hide error banner on successful update */
     showErr(null);
 
     allHits = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     autoExpire();
     rebuildSelects();
 
-    /* Batch render via rAF — prevents layout thrash */
     if (!dirty) {
       dirty = true;
       requestAnimationFrame(() => { dirty = false; applyFilters(); });
@@ -376,9 +407,9 @@ function autoExpire() {
   const now = new Date();
   allHits.forEach(h => {
     if (h.status === "active" && h.expiresAt && new Date(h.expiresAt) < now) {
-      h.status = "timed_out";
+      h.status = "expired";
       setDoc(doc(db, "hits", h.id),
-        { status: "timed_out", timedOutAt: now.toISOString() },
+        { status: "expired", timedOutAt: now.toISOString(), timeLimitSec: 0 },
         { merge: true }
       ).catch(() => {});
     }
@@ -407,20 +438,13 @@ function fill(id, items, ph) {
     items.map(v => `<option value="${x(v)}"${v === c ? " selected" : ""}>${x(v)}</option>`).join("");
 }
 
-/* ── Frequency selector ── */
-window.onFreq = () => {
-  document.getElementById("hrC").style.display =
-    document.getElementById("fqSel").value === "hourly" ? "flex" : "none";
-  applyFilters();
-};
-
 /* ── Filter + render ── */
-window.applyFilters = () => {
-  const freq = document.getElementById("fqSel").value;
-  const hrs  = parseInt(document.getElementById("hrSel").value || "1");
-  const team = document.getElementById("tmSel").value;
-  const wrk  = document.getElementById("wkSel").value;
-  const sts  = document.getElementById("stSel").value;
+function applyFilters() {
+  const freq = fqSel.value;
+  const hrs  = parseInt(hrSel.value || "1");
+  const team = tmSel.value;
+  const wrk  = wkSel.value;
+  const sts  = stSel.value;
   const now  = new Date();
 
   const MS = {
@@ -446,7 +470,9 @@ function renderStats(hits, now) {
   const act  = hits.filter(h => h.status === "active" && new Date(h.expiresAt || 0) > now);
   const sub  = hits.filter(h => h.status === "submitted");
   const mR   = hits.filter(h => h.status === "manual_returned");
-  const aR   = hits.filter(h => h.status === "auto_returned");
+  
+  // EXPIRED HITS NOW COUNT AS AUTO RETURNS
+  const aR   = hits.filter(h => h.status === "auto_returned" || h.status === "expired" || h.status === "timed_out");
   const earn = sub.reduce((s, h) => s + (parseFloat(h.reward) || 0), 0);
 
   set("sAct",  new Set(act.map(h => h.workerId)).size);
@@ -519,7 +545,7 @@ function buildTeam(team, hits, now, isColl) {
   const act  = hits.filter(h => h.status === "active" && new Date(h.expiresAt || 0) > now);
   const sub  = hits.filter(h => h.status === "submitted");
   const mR   = hits.filter(h => h.status === "manual_returned");
-  const aR   = hits.filter(h => h.status === "auto_returned");
+  const aR   = hits.filter(h => h.status === "auto_returned" || h.status === "expired" || h.status === "timed_out");
   const earn = sub.reduce((s, h) => s + (parseFloat(h.reward) || 0), 0);
 
   const el = document.createElement("div");
@@ -576,9 +602,9 @@ function buildRow(h, now) {
     manual_returned: "M Return",
     auto_returned:   "A Return",
     timed_out:       "Timed Out",
+    expired:         "Expired"
   };
 
-  /* If username looks like a raw Worker ID, display it smaller */
   const uname = h.username || h.workerId || "—";
   const unameStyle = /^A[A-Z0-9]{9,}$/.test(uname)
     ? "color:var(--tx2);font-family:var(--mono);font-size:11px"
@@ -629,7 +655,7 @@ function softUpdate(bl, hits, now) {
   const act  = hits.filter(h => h.status === "active" && new Date(h.expiresAt || 0) > now);
   const sub  = hits.filter(h => h.status === "submitted");
   const mR   = hits.filter(h => h.status === "manual_returned");
-  const aR   = hits.filter(h => h.status === "auto_returned");
+  const aR   = hits.filter(h => h.status === "auto_returned" || h.status === "expired" || h.status === "timed_out");
   const earn = sub.reduce((s, h) => s + (parseFloat(h.reward) || 0), 0);
 
   const ps = bl.querySelectorAll(".pill");
@@ -641,7 +667,7 @@ function softUpdate(bl, hits, now) {
 
   const LABEL = {
     active: "Active", submitted: "Submitted",
-    manual_returned: "M Return", auto_returned: "A Return", timed_out: "Timed Out",
+    manual_returned: "M Return", auto_returned: "A Return", timed_out: "Timed Out", expired: "Expired"
   };
 
   hits.forEach((h, i) => {
